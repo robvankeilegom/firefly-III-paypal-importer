@@ -1,24 +1,49 @@
-# Lumen PHP Framework
+# Firefly III PayPal Importer
 
-[![Build Status](https://travis-ci.org/laravel/lumen-framework.svg)](https://travis-ci.org/laravel/lumen-framework)
-[![Total Downloads](https://img.shields.io/packagist/dt/laravel/framework)](https://packagist.org/packages/laravel/lumen-framework)
-[![Latest Stable Version](https://img.shields.io/packagist/v/laravel/framework)](https://packagist.org/packages/laravel/lumen-framework)
-[![License](https://img.shields.io/packagist/l/laravel/framework)](https://packagist.org/packages/laravel/lumen-framework)
+<!-- PROJECT LOGO -->
+<br />
+<p align="center">
+  <a href="https://firefly-iii.org/">
+    <img src="https://raw.githubusercontent.com/firefly-iii/firefly-iii/develop/.github/assets/img/logo-small.png" alt="Firefly III" width="120" height="178">
+  </a>
+</p>
+  <h1 align="center">Firefly III PayPal Importer</h1>
 
-Laravel Lumen is a stunningly fast PHP micro-framework for building web applications with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Lumen attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as routing, database abstraction, queueing, and caching.
+  <p align="center">
+    Import your PayPal transactions into Firefly III
+  </p>
 
-## Official Documentation
 
-Documentation for the framework can be found on the [Lumen website](https://lumen.laravel.com/docs).
+## About Firefly
 
-## Contributing
+"Firefly III" is a (self-hosted) manager for your personal finances. It can help you keep track of your expenses and income, so you can spend less and save more.
+More info at the [website](https://firefly-iii.org/).
 
-Thank you for considering contributing to Lumen! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-## Security Vulnerabilities
+## About the importer
 
-If you discover a security vulnerability within Lumen, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
+This importer retrieves all your transactions via the PayPal API and loads them into your Firefly instance.
 
-## License
+## Getting Started
+To start importing data you'll need a couple of things:
+- A PayPal `ClientID` and `ClientSecret`.  These can be generated at the [PayPal Developer Dashboard](https://developer.paypal.com/developer/applications). Make sure to generate a client for **live** transactions.
+- A Firefly Personal Access Token. Read more about this [here](https://docs.firefly-iii.org/firefly-iii/api/).
+- The ID of the asset account in Firefly. In Firefly, open `Accounts > Asset Accounts` and click on your PayPal account (or make a PayPal account). In the account overview the ID of the account will be in the URL. Something like: `http://firefly.box/accounts/show/xxx`. Where `xxx` will be the account id.
 
-The Lumen framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Install / Setup
+These steps assume you have Composer installed on your system.
+
+- Clone the repo
+- `cd` in to the new project
+- `composer install`: Installs the required `PHP` packages.
+- `touch database/database.sqlite`: Creates an empty database file.
+- `cp .env.example .env`: Creates the environment file with default values.
+- Edit the new `.env` file and:
+    - Set `DB_DATABASE` variable to the absolute path of the database.
+    - Set `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` to the values created in the [PayPal Developer Dashboard](https://developer.paypal.com/developer/applications).
+    - Set `FIREFLY_TOKEN`, `FIREFLY_URI` and `FIREFLY_PAYPAL_ACCOUNT_ID`.
+
+## Run the sync
+```bash
+php artisan sync
+```
