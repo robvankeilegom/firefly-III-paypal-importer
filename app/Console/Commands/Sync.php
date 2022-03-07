@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Sync as AppSync;
 use Illuminate\Console\Command;
 
 class Sync extends Command
@@ -25,13 +26,19 @@ class Sync extends Command
      */
     public function handle(): int
     {
-        $client = new self();
+        $client = new AppSync();
+
+        $this->info('Start pulling data from PayPal');
 
         // Load all transactions from PayPal
         $client->syncPayPal();
 
+        $this->info('Pushing data to Firefly');
+
         // Send them to Firefly
         $client->syncFirefly();
+
+        $this->info('Done');
 
         return 0;
     }
