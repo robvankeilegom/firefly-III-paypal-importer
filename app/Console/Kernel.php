@@ -3,7 +3,9 @@
 namespace App\Console;
 
 use App\Console\Commands\Sync;
+use App\Console\Commands\SyncPayPal;
 use App\Console\Commands\KeyGenerate;
+use App\Console\Commands\SyncFirefly;
 use Illuminate\Console\Scheduling\Schedule;
 use Laravel\Lumen\Console\Kernel as ConsoleKernel;
 
@@ -16,6 +18,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Sync::class,
+        SyncPayPal::class,
+        SyncFirefly::class,
         KeyGenerate::class,
     ];
 
