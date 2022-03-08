@@ -4,7 +4,6 @@ namespace App;
 
 use Carbon\Carbon;
 use GuzzleHttp\Client;
-
 use function GuzzleHttp\json_decode;
 
 class PayPal
