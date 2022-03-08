@@ -35,15 +35,14 @@ These steps assume you have Composer installed on your system.
 
 - Clone the repo
 - `cd` in to the new project
-- `composer install`: Installs the required `PHP` packages.
 - `touch database/database.sqlite`: Creates an empty database file.
 - `cp .env.example .env`: Creates the environment file with default values.
 - Edit the new `.env` file and:
-    - Set `DB_DATABASE` variable to the absolute path of the database.
     - Set `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` to the values created in the [PayPal Developer Dashboard](https://developer.paypal.com/developer/applications).
     - Set `FIREFLY_TOKEN`, `FIREFLY_URI` and `FIREFLY_PAYPAL_ACCOUNT_ID`.
+- Start the docker container: `docker-compose up -d --build`
 
-## Run the sync
+## Run the sync in the container
 ```bash
-php artisan sync
+docker exec firefly-iii-paypal-importer php artisan sync
 ```

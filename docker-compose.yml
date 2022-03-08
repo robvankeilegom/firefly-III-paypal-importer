@@ -1,0 +1,11 @@
+---
+version: '3'
+services:
+  firefly-iii-paypal-importer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: firefly-iii-paypal-importer
+    restart: unless-stopped
+    tty: true
+    working_dir: /var/www/html
