@@ -62,7 +62,21 @@ class Sync
                 $reference = $record->transaction_info->paypal_reference_id;
             }
 
-            $cartItems = ($record->cart_info->item_details);
+            // Start building description.
+            $description = [];
+
+            // Add the invoice_id if available
+            if (isset($record->transaction_info->invoice_id)) {
+                $description[] = $record->transaction_info->invoice_id;
+            }
+
+            if (isset($record->cart_info->item_details)) {
+                $cartItems     = $record->cart_info->item_details;
+                $description[] = implode(', ', array_column($cartItems, 'item_name'));
+            }
+
+            // Remove duplicates. item_details and invoice_id can be the same value.
+            $description = array_unique($description);
 
             $transaction = Transaction::updateOrCreate([
                 'pp_id' => $record->transaction_info->transaction_id,
@@ -72,7 +86,7 @@ class Sync
                 'initiation_date' => $record->transaction_info->transaction_initiation_date,
                 'currency'        => $record->transaction_info->transaction_amount->currency_code,
                 'value'           => $record->transaction_info->transaction_amount->value,
-                'description'     => implode(', ', array_column($cartItems, 'item_name')),
+                'description'     => implode(' | ', $description),
             ]);
 
             if (! is_null($payer)) {
