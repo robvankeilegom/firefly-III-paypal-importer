@@ -50,9 +50,9 @@ class Sync
                 $payer = Payer::updateOrCreate([
                     'pp_id' => $record->payer_info->account_id,
                 ], [
-                    'email'        => $record->payer_info->email_address,
+                    'email'        => $record->payer_info->email_address ?? '',
                     'name'         => $name,
-                    'country_code' => $record->payer_info->country_code,
+                    'country_code' => $record->payer_info->country_code ?? '',
                 ]);
             }
 
