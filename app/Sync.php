@@ -66,13 +66,20 @@ class Sync
             $description = [];
 
             // Add the invoice_id if available
-            if (isset($record->transaction_info->invoice_id)) {
+            if (! empty($record->transaction_info->invoice_id)) {
                 $description[] = $record->transaction_info->invoice_id;
             }
 
-            if (isset($record->cart_info->item_details)) {
-                $cartItems     = $record->cart_info->item_details;
-                $description[] = implode(', ', array_column($cartItems, 'item_name'));
+            if (! empty($record->cart_info->item_details)) {
+                // Get all records with an item_name
+                $cartItems = array_filter($record->cart_info->item_details, function ($item) {
+                    return ! empty($item->item_name);
+                });
+
+                // If there are any items left, add them to the description
+                if (count($cartItems) > 0) {
+                    $description[] = implode(', ', array_column($cartItems, 'item_name'));
+                }
             }
 
             // Remove duplicates. item_details and invoice_id can be the same value.
