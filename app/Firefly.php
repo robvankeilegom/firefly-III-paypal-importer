@@ -3,18 +3,17 @@
 namespace App;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception;
 use App\Models\Transaction;
 
 class Firefly
 {
-    private string $baseUri = 'http://firefly.box/api/v1/';
-
     private string $currency = 'EUR';
 
     public function __construct()
     {
         $this->client = new Client([
-            'base_uri' => $this->baseUri,
+            'base_uri' => rtrim(config('services.firefly.uri'), '/') . '/api/v1/',
             'headers'  => [
                 'Accept'        => 'application/json',
                 'Authorization' => 'Bearer ' . config('services.firefly.token'),
@@ -65,12 +64,12 @@ class Firefly
                             'notes' => $payer->email,
                         ],
                     ]);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $response = json_decode($e->getResponse()->getBody());
 
                     if ('This account name is already in use.' === $response->errors->name[0]) {
                         // TODO. User already exists. Retrieve it somehow.
-                        throw new \RuntimeException('TODO');
+                        throw new \RuntimeException('TODO: Retrieve user ' . $payer->name);
                     }
                 }
                 $response = json_decode($response->getBody());
@@ -133,9 +132,13 @@ class Firefly
                     $response = $this->client->post('transactions', [
                         'json' => $data,
                     ]);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $response = json_decode($e->getResponse()->getBody());
-                    dd($response, $data);
+                    // TODO: error handling
+                    throw $e;
+                } catch (\Exception $e) {
+                    throw $e;
+                    // TODO: error handling
                 }
                 $response                = json_decode($response->getBody());
                 $transaction->firefly_id = $response->data->id;
