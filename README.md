@@ -41,7 +41,7 @@ These steps assume you have Composer installed on your system.
     - Set `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` to the values created in the [PayPal Developer Dashboard](https://developer.paypal.com/developer/applications).
     - Set the correct values to connect to your Firefly instance.
         - `FIREFLY_TOKEN`: [Firefly Personal Access Token](https://docs.firefly-iii.org/firefly-iii/api/)
-        - `FIREFLY_URI`: Location of your Firefly instance. This can be an IP or a domain. Don't prepend a path.
+        - `FIREFLY_URI`: Location of your Firefly instance. This can be an IP or a domain. Don't append a path.
         - `FIREFLY_PAYPAL_ACCOUNT_ID`: The id of your PayPal account in Firefly. Go to `Accounts > Asset Accounts` in firefly. Open your PayPal asset account an you'll see the id in the url.
 - Start the docker container: `docker-compose up -d --build`
 
