@@ -5,6 +5,7 @@ namespace App;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception;
 use App\Models\Transaction;
+use GuzzleHttp\Exception\TransferException;
 
 class Firefly
 {
@@ -55,6 +56,7 @@ class Firefly
             $payer    = $transaction->payer;
 
             if (! $payer->{$property}) {
+                $fireflyId = 0;
                 // Create a new payer account in Firefly
                 try {
                     $response = $this->client->post('accounts', [
@@ -64,17 +66,20 @@ class Firefly
                             'notes' => $payer->email,
                         ],
                     ]);
-                } catch (Exception $e) {
+
+                    $response = json_decode($response->getBody());
+
+                    // Get the id of the newly created account.
+                    $fireflyId = $response->data->id;
+                } catch (TransferException $e) {
                     $response = json_decode($e->getResponse()->getBody());
 
                     if ('This account name is already in use.' === $response->errors->name[0]) {
-                        // TODO. User already exists. Retrieve it somehow.
-                        throw new \RuntimeException('TODO: Retrieve user ' . $payer->name);
+                        $fireflyId = $this->findAccountByName($payer->name);
                     }
                 }
-                $response = json_decode($response->getBody());
 
-                $payer->{$property} = $response->data->id;
+                $payer->{$property} = $fireflyId;
                 $payer->save();
             }
 
@@ -150,5 +155,25 @@ class Firefly
                 $response = json_decode($response->getBody());
             }
         }
+    }
+
+    private function findAccountByName(string $name): string
+    {
+        $response = $this->client->get('search/accounts', [
+            'query' => [
+                'query' => $name, // The query you wish to search for.
+                'field' => 'name', // The account field(s) you want to search in.
+            ],
+        ]);
+
+        $response = json_decode($response->getBody());
+
+        $count = count($response->data);
+
+        if (1 !== $count) {
+            throw RuntimeException('Got ' . $count . ' results from search/accounts. Expected 1 result.');
+        }
+
+        return $response->data[0]->id;
     }
 }
