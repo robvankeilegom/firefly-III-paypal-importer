@@ -55,6 +55,12 @@ class Firefly
             $property = "firefly_{$direction}_id";
             $payer    = $transaction->payer;
 
+            if (is_null($payer)) {
+                \Log::warning("Transaction with id {$transaction->id} doesn't have a payer. Skipping.");
+
+                continue;
+            }
+
             if (! $payer->{$property}) {
                 $fireflyId = 0;
                 // Create a new payer account in Firefly
