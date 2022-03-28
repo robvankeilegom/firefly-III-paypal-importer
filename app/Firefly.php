@@ -3,8 +3,8 @@
 namespace App;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception;
 use App\Models\Transaction;
+use Illuminate\Support\Arr;
 use GuzzleHttp\Exception\TransferException;
 
 class Firefly
@@ -143,8 +143,23 @@ class Firefly
                     $response = $this->client->post('transactions', [
                         'json' => $data,
                     ]);
-                } catch (Exception $e) {
+                } catch (TransferException $e) {
                     $response = json_decode($e->getResponse()->getBody());
+                    $error    = Arr::get(current($response->errors), 0);
+
+                    if ('The selected transactions.0.foreign_currency_code is invalid.' === $error) {
+                        $error = '';
+
+                        if (! is_null($conversion)) {
+                            $error = "Currency {$transaction->currency} or {$conversion->currency} aren't available in Firefly. Add them under Options > Currencies.";
+                        } else {
+                            $error = "Currency {$transaction->currency} isn't available in Firefly. Add it under Options > Currencies.";
+                        }
+
+                        \Log::error($error);
+
+                        continue;
+                    }
                     // TODO: error handling
                     throw $e;
                 } catch (\Exception $e) {
