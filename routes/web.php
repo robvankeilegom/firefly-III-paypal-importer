@@ -16,3 +16,7 @@
 $router->get('/version', function () use ($router) {
     return $router->app->version();
 });
+
+$router->get('/', function () {
+    return view('welcome');
+});

@@ -6,3 +6,4 @@ Homestead.yaml
 .phpunit.result.cache
 .php-cs-fixer.cache
 database/database.sqlite
+node_modules
