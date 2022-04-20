@@ -1,21 +1,10 @@
 <?php
 
-/**
- * @internal
- * @coversNothing
- */
-class ExampleTest extends TestCase
-{
-    /**
-     * A basic test example.
-     */
-    public function testExample()
-    {
-        $this->get('/');
+it('can get version page', function () {
+    $this->get('/version');
 
-        $this->assertSame(
-            $this->app->version(),
-            $this->response->getContent()
-        );
-    }
-}
+    $this->assertSame(
+        $this->app->version(),
+        $this->response->getContent()
+    );
+});
