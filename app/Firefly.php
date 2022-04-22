@@ -5,11 +5,20 @@ namespace App;
 use GuzzleHttp\Client;
 use App\Models\Transaction;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\TransferException;
 
 class Firefly
 {
+    // Default currency
     private string $currency = 'EUR';
+
+    // Guzzle client
+    private Client $client;
 
     public function __construct()
     {
@@ -22,8 +31,12 @@ class Firefly
         ]);
     }
 
-    public function sync($transactions)
+    public function sync(Collection $transactions): void
     {
+        if (! $this->connectionCheck()) {
+            return;
+        }
+
         foreach ($transactions as $transaction) {
             // https://developer.paypal.com/docs/transaction-search/transaction-event-codes/
             // Only get:
@@ -65,23 +78,17 @@ class Firefly
                 $fireflyId = 0;
                 // Create a new payer account in Firefly
                 try {
-                    $response = $this->client->post('accounts', [
-                        'json' => [
-                            'name'  => $payer->name,
-                            'type'  => $direction,
-                            'notes' => $payer->email,
-                        ],
-                    ]);
-
-                    $response = json_decode($response->getBody());
+                    $response = $this->createAccount($payer->name, $direction, $payer->email);
 
                     // Get the id of the newly created account.
                     $fireflyId = $response->data->id;
-                } catch (TransferException $e) {
-                    $response = json_decode($e->getResponse()->getBody());
+                } catch (RequestException $e) {
+                    if ($e->hasResponse()) {
+                        $response = json_decode($e->getResponse()->getBody(), true);
 
-                    if ('This account name is already in use.' === $response->errors->name[0]) {
-                        $fireflyId = $this->findAccountByName($payer->name);
+                        if ('This account name is already in use.' === Arr::get($response, 'errors.name.0')) {
+                            $fireflyId = $this->findAccountByName($payer->name);
+                        }
                     }
                 }
 
@@ -176,6 +183,38 @@ class Firefly
                 $response = json_decode($response->getBody());
             }
         }
+    }
+
+    protected function createAccount(string $name, string $direction, string $email): array
+    {
+        $response = $this->client->post('accounts', [
+            'json' => [
+                'name'  => $name,
+                'type'  => $direction,
+                'notes' => $email,
+            ],
+        ]);
+
+        return json_decode($response->getBody());
+    }
+
+    private function connectionCheck(): bool
+    {
+        try {
+            $response = $this->client->get('about');
+
+            Log::info('Firefly connection successful');
+
+            return true;
+        } catch (ConnectException $e) {
+            Log::error($e->getMessage());
+        } catch (ClientException $e) {
+            Log::error($e->getMessage());
+        } catch (RequestException $e) {
+            Log::error($e->getMessage());
+        }
+
+        return false;
     }
 
     private function findAccountByName(string $name): string
