@@ -10,15 +10,15 @@ jobs:
             matrix:
                 os: [ubuntu-latest]
                 php: [8.1 8.0]
-                laravel: [9.*, 8.*]
+                lumen: [9.*, 8.*]
                 stability: [prefer-stable]
                 include:
-                    -   laravel: 9.*
+                    -   lumen: 9.*
                         testbench: 7.*
-                    -   laravel: 8.*
+                    -   lumen: 8.*
                         testbench: 6.23
 
-        name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
+        name: P${{ matrix.php }} - L${{ matrix.lumen }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
         steps:
             -   name: Checkout code
@@ -38,7 +38,7 @@ jobs:
 
             -   name: Install dependencies
                 run: |
-                    composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+                    composer require "laravel/lumen-framework:${{ matrix.lumen }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
                     composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
             -   name: Execute tests
