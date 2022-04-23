@@ -14,9 +14,7 @@ jobs:
                 stability: [prefer-stable]
                 include:
                     -   lumen: 9.*
-                        testbench: 7.*
                     -   lumen: 8.*
-                        testbench: 6.23
 
         name: P${{ matrix.php }} - L${{ matrix.lumen }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
@@ -38,7 +36,7 @@ jobs:
 
             -   name: Install dependencies
                 run: |
-                    composer require "laravel/lumen-framework:${{ matrix.lumen }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+                    composer require "laravel/lumen-framework:${{ matrix.lumen }}" --no-interaction --no-update
                     composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
             -   name: Execute tests
