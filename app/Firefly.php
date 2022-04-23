@@ -204,6 +204,7 @@ class Firefly
             $response = $this->client->get('about');
 
             Log::info('Firefly connection successful');
+            Log::info($response->getBody());
 
             return true;
         } catch (ConnectException $e) {
