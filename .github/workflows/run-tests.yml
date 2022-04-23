@@ -3,41 +3,29 @@ name: run-tests
 on: [push, pull_request]
 
 jobs:
-    test:
-        runs-on: ${{ matrix.os }}
-        strategy:
-            fail-fast: true
-            matrix:
-                os: [ubuntu-latest]
-                php: [8.1 8.0]
-                lumen: [9.*, 8.*]
-                stability: [prefer-stable]
-                include:
-                    -   lumen: 9.*
-                    -   lumen: 8.*
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        operating-system: ['ubuntu-latest']
+        php-versions: ['8.0', '8.1']
 
-        name: P${{ matrix.php }} - L${{ matrix.lumen }} - ${{ matrix.stability }} - ${{ matrix.os }}
+    env:
+      DB_CONNECTION: sqlite
+      DB_DATABASE: database/database.sqlite
 
-        steps:
-            -   name: Checkout code
-                uses: actions/checkout@v2
+    steps:
+      - uses: actions/checkout@v2
 
-            -   name: Setup PHP
-                uses: shivammathur/setup-php@v2
-                with:
-                    php-version: ${{ matrix.php }}
-                    extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
-                    coverage: none
+      - name: Copy .env
+        run: |
+          php -r "file_exists('.env') || copy('.env.github', '.env');"
 
-            - name: Setup problem matchers
-              run: |
-                  echo "::add-matcher::${{ runner.tool_cache }}/php.json"
-                  echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+      - name: Update Composer
+        run: sudo composer self-update 1.10.15 --no-interaction
 
-            -   name: Install dependencies
-                run: |
-                    composer require "laravel/lumen-framework:${{ matrix.lumen }}" --no-interaction --no-update
-                    composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+      - name: Run Composer Install
+        run: composer install --no-interaction
 
-            -   name: Execute tests
-                run: vendor/bin/pest
+      - name: run tests
+        run: vendor/bin/pest
