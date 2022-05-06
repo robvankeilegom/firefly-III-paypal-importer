@@ -185,7 +185,7 @@ class Firefly
         }
     }
 
-    protected function createAccount(string $name, string $direction, string $email): array
+    protected function createAccount(string $name, string $direction, string $email): stdClass
     {
         $response = $this->client->post('accounts', [
             'json' => [
