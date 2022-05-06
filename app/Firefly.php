@@ -150,10 +150,15 @@ class Firefly
                     $response = $this->client->post('transactions', [
                         'json' => $data,
                     ]);
-                } catch (TransferException $e) {
-                    $response = json_decode($e->getResponse()->getBody());
-                    $error    = Arr::get(current($response->errors), 0);
+                } catch (TransferException | RequestException $e) {
+                    $error = '';
 
+                    if ($e->hasResponse()) {
+                        $response = json_decode($e->getResponse()->getBody());
+                        $error    = Arr::get(current($response->errors), 0);
+                    }
+
+                    // Swap out error for a more clear error message
                     if ('The selected transactions.0.foreign_currency_code is invalid.' === $error) {
                         $error = '';
 
@@ -167,6 +172,14 @@ class Firefly
 
                         continue;
                     }
+
+                    if (str_starts_with($error, 'Duplicate of transaction ')) {
+                        // Skip duplicate transactions
+                        \Log::warning($error);
+
+                        continue;
+                    }
+
                     // TODO: error handling
                     throw $e;
                 } catch (\Exception $e) {
