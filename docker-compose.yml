@@ -7,5 +7,15 @@ services:
       dockerfile: Dockerfile
     container_name: firefly-iii-paypal-importer
     restart: unless-stopped
-    tty: true
     working_dir: /var/www/html
+    ports:
+      - 8000:80
+    volumes:
+      - $PWD/data:/data
+      - .:/var/www/html
+    environment:
+      FIREFLY_TOKEN: ''
+      FIREFLY_URI: http://firefly.box
+      FIREFLY_PAYPAL_ACCOUNT_ID: '1'
+      PAYPAL_CLIENT_ID: ''
+      PAYPAL_CLIENT_SECRET: ''
