@@ -19,7 +19,11 @@
             Firefly III PayPal Importer
         </h1>
 
-        <h2 class="italic">
+        <div class="text-xs italic text-center text-white">
+            version: {{ config('app.version') }}
+        </div>
+
+        <h2 class="mt-4">
             Instance contains {{ $txCount }} transactions.
         </h2>
 
@@ -35,6 +39,8 @@
         <a href="https://github.com/firefly-iii/firefly-iii" target="_blank" class="hover:underline">Firefly III</a>
         <span class="mx-3">•</span>
         <a href="{{ config('services.firefly.uri') }}" target="_blank" class="hover:underline">Your Firefly III instance</a>
+
     </footer>
+
 </body>
 </html>
