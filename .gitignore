@@ -7,3 +7,5 @@ Homestead.yaml
 .php-cs-fixer.cache
 database/database.sqlite
 node_modules
+data
+.first_run_done

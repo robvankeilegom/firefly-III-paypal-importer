@@ -26,6 +26,7 @@ class Sync extends Command
      */
     public function handle(): int
     {
+        // Create a sync instance
         $client = new AppSync();
 
         $this->info('Start pulling data from PayPal');

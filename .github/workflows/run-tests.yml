@@ -1,0 +1,31 @@
+name: run-tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        operating-system: ['ubuntu-latest']
+        php-versions: ['8.0', '8.1']
+
+    env:
+      DB_CONNECTION: sqlite
+      DB_DATABASE: database/database.sqlite
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Copy .env
+        run: |
+          php -r "file_exists('.env') || copy('.env.github', '.env');"
+
+      - name: Update Composer
+        run: sudo composer self-update 1.10.15 --no-interaction
+
+      - name: Run Composer Install
+        run: composer install --no-interaction
+
+      - name: run tests
+        run: vendor/bin/pest
