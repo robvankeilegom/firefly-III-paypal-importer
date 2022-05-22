@@ -12,7 +12,8 @@ if (!function_exists('mix')) {
      *
      * @throws \Exception
      */
-    function mix($path, $manifestDirectory = '') {
+    function mix($path, $manifestDirectory = '')
+    {
         static $manifests = [];
 
         if (!preg_match('/^\//', $path)) {
@@ -54,7 +55,8 @@ if (!function_exists('public_path')) {
      * @param string $path
      * @return string
      */
-    function public_path($path = '') {
+    function public_path($path = '')
+    {
         $public_folder = realpath(__DIR__ . '/../public/');
 
         return $public_folder . ($path ? DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR) : $path);
