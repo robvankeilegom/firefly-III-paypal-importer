@@ -43,7 +43,7 @@ steps:
     image: alpine/git
     commands:
       - git add .
-      - git diff-index --quiet HEAD || git commit -m "[skip ci] :art: Run linters"
+      - git diff-index --quiet HEAD || git commit -m "[skip ci] :art:\ Run linters"
       - git pull origin $DRONE_TARGET_BRANCH --no-rebase
       - git push --set-upstream origin $DRONE_TARGET_BRANCH
     depends_on:
@@ -86,7 +86,7 @@ steps:
     image: alpine/git
     commands:
       - git add .
-      - git diff-index --quiet HEAD || git commit -m "[skip ci] :art: Update CHANGELOG.md"
+      - git diff-index --quiet HEAD || git commit -m "[skip ci] :art:\ Update CHANGELOG.md"
       - git pull origin $DRONE_TARGET_BRANCH --no-rebase
       - git push --set-upstream origin $DRONE_TARGET_BRANCH
 
