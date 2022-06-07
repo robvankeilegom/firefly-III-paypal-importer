@@ -1,0 +1,117 @@
+---
+kind: pipeline
+name: Default
+
+trigger:
+  event:
+    include:
+      - push
+
+steps:
+  - name: Install packages
+    image: composer
+    volumes:
+      - name: tools
+        path: /root/tools
+    commands:
+      - composer install --no-interaction
+      - mkdir -p /root/tools/phpcbf /root/tools/php-cs-fixer
+      - composer global require "squizlabs/php_codesniffer" --working-dir=/root/tools/phpcbf
+      - composer global require "friendsofphp/php-cs-fixer" --working-dir=/root/tools/php-cs-fixer
+
+  - name: Run tests
+    image: php:8.1
+    commands:
+      - mkdir -p /data
+      - touch /data/database.sqlite
+      - vendor/bin/pest
+    depends_on:
+      - Install packages
+
+  - name: Run linter
+    image: php:8.1
+    volumes:
+      - name: tools
+        path: /root/tools
+    commands:
+      - /root/tools/phpcbf/vendor/bin/phpcbf > /dev/null || true
+      - /root/tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config .php-cs-fixer.dist.php
+    depends_on:
+      - Install packages
+
+  - name: Commit changes by linter
+    image: alpine/git
+    commands:
+      - git add .
+      - git diff-index --quiet HEAD || git commit -m "[skip ci] :art:\ Run linters"
+      - git pull origin $DRONE_TARGET_BRANCH --no-rebase
+      - git push --set-upstream origin $DRONE_TARGET_BRANCH
+    depends_on:
+      - Run linter
+
+volumes:
+- name: tools
+  temp: {}
+
+---
+kind: pipeline
+name: Update Changelog
+
+trigger:
+  event:
+    include:
+      - push
+  branch:
+    - master
+
+steps:
+  - name: Restore cache
+    image: drillster/drone-volume-cache
+    volumes:
+      - name: cache
+        path: /cache
+    settings:
+      restore: true
+      mount:
+        - ./node_modules
+
+  - name: Install and run gitmoji-changelog
+    image: node:16.14.2
+    commands:
+      - yarn config set cache-folder .yarn-cache
+      - yarn global add gitmoji-changelog --prefix /usr/local
+      - gitmoji-changelog
+
+  - name: Commit CHANGELOG.md
+    image: alpine/git
+    commands:
+      - git add .
+      - git diff-index --quiet HEAD || git commit -m "[skip ci] :art:\ Update CHANGELOG.md"
+      - git pull origin $DRONE_TARGET_BRANCH --no-rebase
+      - git push --set-upstream origin $DRONE_TARGET_BRANCH
+
+---
+kind: pipeline
+name: Build Docker container
+
+trigger:
+  event:
+    include:
+      - push
+  branch:
+    - master
+
+steps:
+  - name: Build and push Docker container
+    image: docker
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - docker build -t robvankeilegom/firefly-iii-paypal-importer .
+      - docker push robvankeilegom/firefly-iii-paypal-importer:latest
+
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock

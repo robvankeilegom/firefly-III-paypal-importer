@@ -2,6 +2,7 @@
 
 namespace App;
 
+use stdClass;
 use GuzzleHttp\Client;
 use App\Models\Transaction;
 use Illuminate\Support\Arr;

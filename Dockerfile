@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     cron
 
+RUN docker-php-ext-install pdo pdo_mysql
+
 # Change the document root to /var/www/html/public
 RUN sed -i -e "s/html/html\/public/g" /etc/apache2/sites-enabled/000-default.conf
 
