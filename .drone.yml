@@ -102,15 +102,14 @@ trigger:
     - master
 
 steps:
-  - name: Build Docker container
+  - name: Build and push Docker container
     image: docker
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
       - docker build -t robvankeilegom/firefly-iii-paypal-importer .
-    # TODO: Publish
-
+      - docker push robvankeilegom/firefly-iii-paypal-importer:latest
 
 volumes:
   - name: dockersock
