@@ -31,21 +31,45 @@ To start importing data you'll need a couple of things:
 - The ID of the asset account in Firefly. In Firefly, open `Accounts > Asset Accounts` and click on your PayPal account (or make a PayPal account). In the account overview the ID of the account will be in the URL. Something like: `http://firefly.box/accounts/show/xxx`. Where `xxx` will be the account id.
 
 ## Install / Setup
-These steps assume you have Composer installed on your system.
 
-- Clone the repo
-- `cd` in to the new project
-- `touch database/database.sqlite`: Creates an empty database file.
-- `cp .env.example .env`: Creates the environment file with default values.
-- Edit the new `.env` file and:
-    - Set `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` to the values created in the [PayPal Developer Dashboard](https://developer.paypal.com/developer/applications).
-    - Set the correct values to connect to your Firefly instance.
-        - `FIREFLY_TOKEN`: [Firefly Personal Access Token](https://docs.firefly-iii.org/firefly-iii/api/)
-        - `FIREFLY_URI`: Location of your Firefly instance. This can be an IP or a domain. Don't append a path.
-        - `FIREFLY_PAYPAL_ACCOUNT_ID`: The id of your PayPal account in Firefly. Go to `Accounts > Asset Accounts` in firefly. Open your PayPal asset account an you'll see the id in the url.
-- Start the docker container: `docker-compose up -d --build`
+### Docker
+You can run the importer in a docker container. This is the easiest and fastest way to get up and running. Don't forget to enter the correct `env` values. The container will run the sync command every night at midnight.
 
-## Run the sync in the container
+```bash
+docker run \
+    --volume=$PWD/data:/data \
+    --publish=8080:80 \
+    --env=FIREFLY_TOKEN=
+    --env=FIREFLY_URI=firefly:8080 \
+    --env=FIREFLY_PAYPAL_ACCOUNT_ID=1 \
+    --env=PAYPAL_CLIENT_ID= \
+    --env=PAYPAL_CLIENT_SECRET= \
+    --restart=always \
+    --detach=true \
+    --name=firefly-iii-paypal-importer \
+    robvankeilegom/firefly-iii-paypal-importer:latest
+```
+
+Run the sync in the container (or you can wait until midnight).
 ```bash
 docker exec firefly-iii-paypal-importer php artisan sync
 ```
+
+### From Source
+- Clone the repo
+- `cd` into the new project
+- `touch database/database.sqlite`: Creates an empty database file.
+- `cp .env.example .env`: Creates the environment file with default values.
+- Edit the new `.env` file.
+- Run the sync command: `php artisan sync`.
+
+### SQLite/MySQL
+By default the application uses SQLite to store its local data. If you want to use `MySQL` set the following env variables:
+- DB_CONNECTION: mysql
+- DB_HOST: 127.0.0.1
+- DB_PORT: 3306
+- DB_DATABASE: ff_iii_pp_importer
+- DB_USERNAME: ff_iii_pp_importer
+- DB_PASSWORD: secret
+
+
