@@ -60,9 +60,7 @@ name: Update Changelog
 trigger:
   event:
     include:
-      - push
-  branch:
-    - master
+      - tag
 
 steps:
   - name: Restore cache
@@ -80,7 +78,7 @@ steps:
     commands:
       - yarn config set cache-folder .yarn-cache
       - yarn global add gitmoji-changelog --prefix /usr/local
-      - gitmoji-changelog
+      - gitmoji-changelog $DRONE_TAG
 
   - name: Commit CHANGELOG.md
     image: alpine/git
