@@ -1,3 +1,18 @@
+# Build frontend assets
+FROM node:16 as frontend
+
+RUN mkdir -p /app/public /public/ /public/css/
+
+COPY package.json webpack.mix.js yarn.lock tailwind.config.js /app/
+
+COPY resources/ /app/resources/
+
+WORKDIR /app
+
+RUN ls
+RUN yarn install && yarn production
+
+# Start actual container
 FROM php:8.1.3-apache
 
 RUN apt-get update && apt-get install -y \
@@ -31,6 +46,11 @@ WORKDIR /var/www/html
 
 # Copy source files
 COPY . .
+
+# Copy build assets
+COPY --from=frontend /app/public/js/ /var/www/html/public/js/
+COPY --from=frontend /app/public/css/ /var/www/html/public/css/
+COPY --from=frontend /app/mix-manifest.json /var/www/html/mix-manifest.json
 
 # Make sure the scheduler works
 RUN echo "* * * * * root php /var/www/html/artisan schedule:run >> /var/log/cron.log 2>&1" >> /etc/crontab
