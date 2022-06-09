@@ -53,40 +53,6 @@ volumes:
 - name: tools
   temp: {}
 
----
-kind: pipeline
-name: Update Changelog
-
-trigger:
-  event:
-    include:
-      - tag
-
-steps:
-  - name: Restore cache
-    image: drillster/drone-volume-cache
-    volumes:
-      - name: cache
-        path: /cache
-    settings:
-      restore: true
-      mount:
-        - ./node_modules
-
-  - name: Install and run gitmoji-changelog
-    image: node:16.14.2
-    commands:
-      - yarn config set cache-folder .yarn-cache
-      - yarn global add gitmoji-changelog --prefix /usr/local
-      - gitmoji-changelog $DRONE_TAG
-
-  - name: Commit CHANGELOG.md
-    image: alpine/git
-    commands:
-      - git add .
-      - git diff-index --quiet HEAD || git commit -m "[skip ci] :art:\ Update CHANGELOG.md"
-      - git pull origin $DRONE_TARGET_BRANCH --no-rebase
-      - git push --set-upstream origin $DRONE_TARGET_BRANCH
 
 ---
 kind: pipeline
