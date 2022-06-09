@@ -72,7 +72,7 @@ steps:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      - docker build -t robvankeilegom/firefly-iii-paypal-importer .
+      - docker build -t robvankeilegom/firefly-iii-paypal-importer:latest .
 
   - name: Publish Docker container
     image: docker
@@ -104,7 +104,7 @@ steps:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      - docker build -t robvankeilegom/firefly-iii-paypal-importer .
+      - docker build -t robvankeilegom/firefly-iii-paypal-importer:$DRONE_TAG .
 
   - name: Publish Docker container
     image: docker
