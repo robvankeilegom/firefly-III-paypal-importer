@@ -88,6 +88,11 @@ steps:
       - echo $DOCKER_PW | docker login --username $DOCKER_USER --password-stdin
       - docker push robvankeilegom/firefly-iii-paypal-importer:latest
 
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
+
 ---
 kind: pipeline
 name: Build Docker for specific tag
