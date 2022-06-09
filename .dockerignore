@@ -1,3 +1,7 @@
-vendor
-node_modules
+vendor/
+node_modules/
 .env
+.git/
+public/js/
+public/css/
+yarn-error.log
