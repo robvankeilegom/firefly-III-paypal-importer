@@ -9,7 +9,6 @@ COPY resources/ /app/resources/
 
 WORKDIR /app
 
-RUN ls
 RUN yarn install && yarn production
 
 # Start actual container
@@ -50,7 +49,7 @@ COPY . .
 # Copy build assets
 COPY --from=frontend /app/public/js/ /var/www/html/public/js/
 COPY --from=frontend /app/public/css/ /var/www/html/public/css/
-COPY --from=frontend /app/mix-manifest.json /var/www/html/mix-manifest.json
+COPY --from=frontend /app/public/mix-manifest.json /var/www/html/public/mix-manifest.json
 
 # Make sure the scheduler works
 RUN echo "* * * * * root php /var/www/html/artisan schedule:run >> /var/log/cron.log 2>&1" >> /etc/crontab
