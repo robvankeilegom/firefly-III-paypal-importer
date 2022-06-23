@@ -109,6 +109,9 @@ class Sync
 
     public function syncFirefly()
     {
-        $this->firefly->sync(Transaction::all());
+        foreach (Transaction::all() as $transaction) {
+            $transaction = $this->firefly->push($transaction);
+            $transaction->save();
+        }
     }
 }
