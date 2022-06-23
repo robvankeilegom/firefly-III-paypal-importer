@@ -27,6 +27,7 @@ class Sync
 
         $records = $this->paypal->getTransactions($date);
 
+        // TODO: not sure if this is correct. What if there's a month without a payment?
         if (is_null($records)) {
             // We're done
             return;
@@ -104,6 +105,7 @@ class Sync
             $transaction->save();
         }
 
+        // Sync the previous month
         $this->syncPayPal($date->copy()->subMonth());
     }
 
