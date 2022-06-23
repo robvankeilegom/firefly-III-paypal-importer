@@ -170,8 +170,7 @@ class Firefly
 
             if ($e->hasResponse()) {
                 $response = json_decode($e->getResponse()->getBody());
-                dd($response, $e);
-                $error = Arr::get(current($response->errors), 0);
+                $error    = Arr::get(current($response->errors), 0);
             }
 
             // Swap out error for a more clear error message
