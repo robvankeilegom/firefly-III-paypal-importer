@@ -3,6 +3,7 @@
 namespace App;
 
 use stdClass;
+use RuntimeException;
 use GuzzleHttp\Client;
 use App\Models\Transaction;
 use Illuminate\Support\Arr;
@@ -262,7 +263,7 @@ class Firefly
         $count = count($response->data);
 
         if (1 !== $count) {
-            throw RuntimeException('Got ' . $count . ' results from search/accounts. Expected 1 result.');
+            throw new RuntimeException('Got ' . $count . ' results from search/accounts. Expected 1 result. q: ' . $name);
         }
 
         return $response->data[0]->id;
