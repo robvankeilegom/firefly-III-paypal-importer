@@ -24,6 +24,7 @@
 
         <h2 class="mt-4">
             Instance contains {{ $txCount }} transactions.
+            {{ $txPushed }} of which are pushed to your Firefly instance.
         </h2>
 
     </header>
