@@ -8,8 +8,19 @@ class WelcomeController
 {
     public function index()
     {
-        $txCount = Transaction::count();
+        $txs = Transaction::all()
+            ->filter(function ($t) {
+                return $t->is_payment || $t->is_refund;
+            });
 
-        return view('welcome', compact('txCount'));
+        $txCount = $txs->count();
+
+        $txPushed = $txs
+            ->filter(function ($t) {
+                return (bool) $t->firefly_id;
+            })
+            ->count();
+
+        return view('welcome', compact('txCount', 'txPushed'));
     }
 }

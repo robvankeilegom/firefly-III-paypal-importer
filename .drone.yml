@@ -56,7 +56,9 @@ volumes:
 
 ---
 kind: pipeline
-name: Build Docker container
+name: Build Docker container (latest)
+depends_on:
+  - Default
 
 trigger:
   event:
@@ -95,7 +97,50 @@ volumes:
 
 ---
 kind: pipeline
+name: Build Docker container (develop)
+depends_on:
+  - Default
+
+trigger:
+  event:
+    include:
+      - push
+  branch:
+    - develop
+
+steps:
+  - name: Build Docker container
+    image: docker
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - docker build -t robvankeilegom/firefly-iii-paypal-importer:develop .
+
+  - name: Publish Docker container
+    image: docker
+    environment:
+      DOCKER_USER:
+        from_secret: docker_username
+      DOCKER_PW:
+        from_secret: docker_password
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - echo $DOCKER_PW | docker login --username $DOCKER_USER --password-stdin
+      - docker push robvankeilegom/firefly-iii-paypal-importer:develop
+
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
+
+---
+kind: pipeline
 name: Build Docker for specific tag
+depends_on:
+  - Default
 
 trigger:
   event:

@@ -36,4 +36,14 @@ class Transaction extends Model
     {
         return $this->belongsTo(Payer::class);
     }
+
+    public function getIsPaymentAttribute(): bool
+    {
+        return 'T00' === substr($this->event_code, 0, 3);
+    }
+
+    public function getIsRefundAttribute(): bool
+    {
+        return in_array($this->event_code, ['T1106', 'T1107']);
+    }
 }

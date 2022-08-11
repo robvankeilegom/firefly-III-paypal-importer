@@ -1,6 +1,26 @@
 ---
 version: '3'
+
 services:
+
+  firefly:
+    container_name: firefly
+    image: fireflyiii/core:latest
+    restart: always
+    volumes:
+      - firefly_iii_upload:/var/www/html/storage/upload
+    networks:
+      - user-bridge
+    environment:
+      APP_KEY: eKT9V6t5eUqT1ROeEt9QzXEygjaJcEzZ
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ff_iii
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    ports:
+      - 8001:8080
+
   firefly-iii-paypal-importer:
     build:
       context: .
@@ -9,13 +29,27 @@ services:
     restart: unless-stopped
     working_dir: /var/www/html
     ports:
-      - 8000:80
+      - 8002:80
     volumes:
       - $PWD/data:/data
       - .:/var/www/html
+    networks:
+      - user-bridge
     environment:
-      FIREFLY_TOKEN: ''
-      FIREFLY_URI: http://firefly.box
-      FIREFLY_PAYPAL_ACCOUNT_ID: '1'
-      PAYPAL_CLIENT_ID: ''
-      PAYPAL_CLIENT_SECRET: ''
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ff_iii_paypal_importer
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      FIREFLY_TOKEN: ${FIREFLY_TOKEN}
+      FIREFLY_URI: ${FIREFLY_URI}
+      FIREFLY_PAYPAL_ACCOUNT_ID: ${FIREFLY_PAYPAL_ACCOUNT_ID}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET}
+
+volumes:
+   firefly_iii_upload:
+
+networks:
+  user-bridge:
+    external: true

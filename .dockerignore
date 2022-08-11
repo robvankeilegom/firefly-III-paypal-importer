@@ -4,4 +4,5 @@ node_modules/
 .git/
 public/js/
 public/css/
+public/mix-manifest.json
 yarn-error.log
