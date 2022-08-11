@@ -113,8 +113,6 @@ class Sync
     {
         foreach (Transaction::all() as $transaction) {
             $this->firefly->push($transaction);
-
-            $transaction->save();
         }
     }
 }

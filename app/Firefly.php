@@ -210,6 +210,9 @@ class Firefly
 
         $transaction->firefly_id = $response->data->id;
 
+        // Save transaction here. Otherwise if the transaction was swapped for a conversion, the firefly_id would never be saved.
+        $transaction->save();
+
         return true;
     }
 
