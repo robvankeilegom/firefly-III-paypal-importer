@@ -56,7 +56,9 @@ volumes:
 
 ---
 kind: pipeline
-name: Build Docker container
+name: Build Docker container (latest)
+depends_on:
+  - Default
 
 trigger:
   event:
@@ -137,6 +139,8 @@ volumes:
 ---
 kind: pipeline
 name: Build Docker for specific tag
+depends_on:
+  - Default
 
 trigger:
   event:
