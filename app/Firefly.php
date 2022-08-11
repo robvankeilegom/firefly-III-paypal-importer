@@ -114,6 +114,9 @@ class Firefly
 
         $conversion = null;
 
+        // Get the type of the transaction before the possible convertion to a conversion
+        $type = $transaction->is_payment ? 'withdrawal' : 'deposit';
+
         // If the transaction is in a foreign currency, set it as the
         // conversion and get the transaction in the active currency
         if ($transaction->currency !== $this->currency) {
@@ -132,7 +135,7 @@ class Firefly
             'fire_webhooks'           => true,
             'transactions'            => [
                 [
-                    'type'           => $transaction->is_payment ? 'withdrawal' : 'deposit',
+                    'type'           => $type,
                     'date'           => $transaction->initiation_date->toAtomString(),
                     'amount'         => abs($transaction->value),
                     'description'    => $transaction->description ?: $transaction->pp_id,
