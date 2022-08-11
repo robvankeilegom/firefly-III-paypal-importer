@@ -106,7 +106,7 @@ class Firefly
         // We got the opposing account. Set the source or destination. Depending on the transaction.
         if ($transaction->is_payment) {
             // If the this is an expense we have to overwrite the destination.
-            $destination = $payer->{$property};
+            $destination = (int) $payer->{$property};
         } else {
             // If the this is a revenue we have to overwrite the source.
             $source = $payer->{$property};
