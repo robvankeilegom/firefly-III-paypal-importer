@@ -96,7 +96,8 @@ volumes:
 ---
 kind: pipeline
 name: Build Docker container (develop)
-depends_on: Default
+depends_on:
+  - Default
 
 trigger:
   event:
