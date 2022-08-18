@@ -44,11 +44,14 @@ docker run \
     --env=FIREFLY_PAYPAL_ACCOUNT_ID=1 \
     --env=PAYPAL_CLIENT_ID= \
     --env=PAYPAL_CLIENT_SECRET= \
+    --env=CURRENCY=EUR \
     --restart=always \
     --detach=true \
     --name=firefly-iii-paypal-importer \
     robvankeilegom/firefly-iii-paypal-importer:latest
 ```
+
+Set the `CURRENCY` env variable to the default currency of your country. This should match the default currency in PayPal and Firefly.
 
 Run the sync in the container (or you can wait until midnight).
 ```bash
