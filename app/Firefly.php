@@ -16,7 +16,7 @@ use GuzzleHttp\Exception\TransferException;
 class Firefly
 {
     // Default currency
-    private string $currency = 'EUR';
+    private string $currency;
 
     // Guzzle client
     private Client $client;
@@ -30,6 +30,9 @@ class Firefly
                 'Authorization' => 'Bearer ' . config('services.firefly.token'),
             ],
         ]);
+
+        // https://developer.paypal.com/api/rest/reference/currency-codes/
+        $this->currency = config('app.currency');
     }
 
     public function push(Transaction $transaction): bool
