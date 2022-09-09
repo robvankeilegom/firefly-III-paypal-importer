@@ -97,7 +97,7 @@ class Firefly
 
                     if ('This account name is already in use.' === Arr::get($response, 'errors.name.0')) {
                         // Find the account by name
-                        $fireflyId = $this->findAccountByName($payer->name);
+                        $fireflyId = $this->findAccountByName($payer->name, $direction);
                     }
                 }
             }
@@ -258,11 +258,12 @@ class Firefly
         return json_decode($response->getBody());
     }
 
-    private function findAccountByName(string $name): string
+    private function findAccountByName(string $name, string $type): string
     {
         $response = $this->client->get('search/accounts', [
             'query' => [
                 'query' => $name, // The query you wish to search for.
+                'type'  => $type, // Type of the account (revenue or expense)
                 'field' => 'name', // The account field(s) you want to search in.
             ],
         ]);
@@ -271,10 +272,30 @@ class Firefly
 
         $count = count($response->data);
 
-        if (1 !== $count) {
-            throw new RuntimeException('Got ' . $count . ' results from search/accounts. Expected 1 result. q: ' . $name);
+        // There's only one account, return it.
+        if (1 === $count) {
+            return $response->data[0]->id;
         }
 
-        return $response->data[0]->id;
+        $exactMatches = 0;
+        $match        = null;
+
+        // Check if there's a single account with an exact match.
+        foreach ($response->data as $account) {
+            if ($account->attributes->name === $name) {
+                ++$exactMatches;
+                $match = $account;
+            }
+        }
+
+        if (1 === $exactMatches) {
+            // Yes there is, return it.
+            return $match->id;
+        }
+
+        // Not sure what to do.
+        throw new RuntimeException(
+            'Got ' . $count . ' results from search/accounts. Expected 1 result. q: ' . $name . ' type: ' . $type
+        );
     }
 }
