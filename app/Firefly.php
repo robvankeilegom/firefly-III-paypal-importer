@@ -7,6 +7,7 @@ use RuntimeException;
 use GuzzleHttp\Client;
 use App\Models\Transaction;
 use Illuminate\Support\Arr;
+use Carbon\Exceptions\Exception;
 use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
@@ -44,7 +45,7 @@ class Firefly
         // -- T1106 Payment reversal, initiated by PayPal.  Completion of a chargeback.
         // -- T1107 Payment refund, initiated by merchant.
 
-        if (! $transaction->is_payment && ! $transaction->is_refund) {
+        if (! $transaction->is_payment && ! $transaction->is_refund && ! $transaction->is_revenue) {
             return false;
         }
 
@@ -60,6 +61,7 @@ class Firefly
             // Transaction is a payment. So the source will be the paypal account
             $source = intval(config('services.firefly.account'));
         } else {
+            // Revenue or refund
             $direction = 'revenue';
 
             // Transaction is a deposit. So the destiniation will be the paypal account

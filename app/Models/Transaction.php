@@ -39,7 +39,12 @@ class Transaction extends Model
 
     public function getIsPaymentAttribute(): bool
     {
-        return 'T00' === substr($this->event_code, 0, 3);
+        return 'T00' === substr($this->event_code, 0, 3) && $this->value < 0;
+    }
+
+    public function getIsRevenueAttribute(): bool
+    {
+        return 'T00' === substr($this->event_code, 0, 3) && $this->value > 0;
     }
 
     public function getIsRefundAttribute(): bool
