@@ -179,7 +179,13 @@ class Firefly
 
             if ($e->hasResponse()) {
                 $response = json_decode($e->getResponse()->getBody());
-                $error    = Arr::get(current($response->errors), 0);
+
+                // Check if the response has an 'errors' property.
+                // If so we can print out a more detailed error than the one
+                // firefly provides
+                if (property_exists($error, 'errors')) {
+                    $error = Arr::get(current($response->errors), 0);
+                }
             }
 
             // Swap out error for a more clear error message
