@@ -7,6 +7,7 @@ use RuntimeException;
 use GuzzleHttp\Client;
 use App\Models\Transaction;
 use Illuminate\Support\Arr;
+use Carbon\Exceptions\Exception;
 use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
@@ -44,7 +45,7 @@ class Firefly
         // -- T1106 Payment reversal, initiated by PayPal.  Completion of a chargeback.
         // -- T1107 Payment refund, initiated by merchant.
 
-        if (! $transaction->is_payment && ! $transaction->is_refund) {
+        if (! $transaction->is_payment && ! $transaction->is_refund && ! $transaction->is_revenue) {
             return false;
         }
 
@@ -60,6 +61,7 @@ class Firefly
             // Transaction is a payment. So the source will be the paypal account
             $source = intval(config('services.firefly.account'));
         } else {
+            // Revenue or refund
             $direction = 'revenue';
 
             // Transaction is a deposit. So the destiniation will be the paypal account
@@ -97,7 +99,7 @@ class Firefly
 
                     if ('This account name is already in use.' === Arr::get($response, 'errors.name.0')) {
                         // Find the account by name
-                        $fireflyId = $this->findAccountByName($payer->name);
+                        $fireflyId = $this->findAccountByName($payer->name, $direction);
                     }
                 }
             }
@@ -177,7 +179,13 @@ class Firefly
 
             if ($e->hasResponse()) {
                 $response = json_decode($e->getResponse()->getBody());
-                $error    = Arr::get(current($response->errors), 0);
+
+                // Check if the response has an 'errors' property.
+                // If so we can print out a more detailed error than the one
+                // firefly provides
+                if (property_exists($error, 'errors')) {
+                    $error = Arr::get(current($response->errors), 0);
+                }
             }
 
             // Swap out error for a more clear error message
@@ -258,11 +266,12 @@ class Firefly
         return json_decode($response->getBody());
     }
 
-    private function findAccountByName(string $name): string
+    private function findAccountByName(string $name, string $type): string
     {
         $response = $this->client->get('search/accounts', [
             'query' => [
                 'query' => $name, // The query you wish to search for.
+                'type'  => $type, // Type of the account (revenue or expense)
                 'field' => 'name', // The account field(s) you want to search in.
             ],
         ]);
@@ -271,10 +280,30 @@ class Firefly
 
         $count = count($response->data);
 
-        if (1 !== $count) {
-            throw new RuntimeException('Got ' . $count . ' results from search/accounts. Expected 1 result. q: ' . $name);
+        // There's only one account, return it.
+        if (1 === $count) {
+            return $response->data[0]->id;
         }
 
-        return $response->data[0]->id;
+        $exactMatches = 0;
+        $match        = null;
+
+        // Check if there's a single account with an exact match.
+        foreach ($response->data as $account) {
+            if ($account->attributes->name === $name) {
+                ++$exactMatches;
+                $match = $account;
+            }
+        }
+
+        if (1 === $exactMatches) {
+            // Yes there is, return it.
+            return $match->id;
+        }
+
+        // Not sure what to do.
+        throw new RuntimeException(
+            'Got ' . $count . ' results from search/accounts. Expected 1 result. q: ' . $name . ' type: ' . $type
+        );
     }
 }
