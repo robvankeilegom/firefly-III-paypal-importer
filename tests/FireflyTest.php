@@ -8,7 +8,7 @@ beforeEach(function () {
     $this->firefly = new Firefly();
 });
 
-it('can push an expense', function () {
+it('can push a expense', function () {
     $payer = Payer::factory()->create();
 
     $transaction = Transaction::factory()
