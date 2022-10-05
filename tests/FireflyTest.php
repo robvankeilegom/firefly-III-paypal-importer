@@ -8,7 +8,7 @@ beforeEach(function () {
     $this->firefly = new Firefly();
 });
 
-it('can push a expense', function () {
+it('can push an expense', function () {
     $payer = Payer::factory()->create();
 
     $transaction = Transaction::factory()
@@ -19,6 +19,7 @@ it('can push a expense', function () {
     $response = $this->firefly->push($transaction);
 
     expect($response)->not->toBeFalse();
+    expect($transaction->firefly_id)->not->toBeNull();
 });
 
 it('can push a transaction with an existing unknown payer', function () {
