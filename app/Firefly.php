@@ -192,7 +192,7 @@ class Firefly
                 // Check if the response has an 'errors' property.
                 // If so we can print out a more detailed error than the one
                 // firefly provides
-                if (property_exists($error, 'errors')) {
+                if (property_exists($response, 'errors')) {
                     $error = Arr::get(current($response->errors), 0);
                 }
             }
