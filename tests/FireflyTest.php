@@ -35,11 +35,6 @@ it('can push a known expense that is unknown in firefly', function () {
 
     $response = $this->firefly->push($transaction);
 
-    $transaction->firefly_id = null;
-    $transaction->save();
-
-    $response = $this->firefly->push($transaction);
-
     expect($response)->not->toBeFalse();
     expect($transaction->firefly_id)->not->toBeNull();
 });
