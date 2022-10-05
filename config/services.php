@@ -2,6 +2,7 @@
 
 return [
     'paypal' => [
+        'uri'           => env('PAYPAL_URI', 'https://api-m.paypal.com/v1/'),
         'client_id'     => env('PAYPAL_CLIENT_ID'),
         'client_secret' => env('PAYPAL_CLIENT_SECRET'),
     ],
