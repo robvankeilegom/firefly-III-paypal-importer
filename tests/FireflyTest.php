@@ -44,6 +44,26 @@ it('can push a known expense that is unknown in firefly', function () {
     expect($transaction->firefly_id)->not->toBeNull();
 });
 
+it('can push a new expense that is known in firefly', function () {
+    $payer = Payer::factory()->create();
+
+    $transaction = Transaction::factory()
+        ->for($payer)
+        ->expense()
+        ->create();
+
+    $response = $this->firefly->push($transaction);
+
+    $transaction->firefly_id = null;
+    $transaction->save();
+
+    $response = $this->firefly->push($transaction);
+
+    expect($response)->not->toBeFalse();
+    // We expect the id to be null since the transaction won't be pushed
+    expect($transaction->firefly_id)->toBeNull();
+});
+
 it('can push a revenue', function () {
     $payer = Payer::factory()->create();
 
