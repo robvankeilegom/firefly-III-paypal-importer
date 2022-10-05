@@ -216,7 +216,8 @@ class Firefly
             if (str_starts_with($error, 'Duplicate of transaction ')) {
                 \Log::warning($error);
 
-                return false;
+                // Return true since this isn't really a problem
+                return true;
             }
 
             // TODO: error handling
