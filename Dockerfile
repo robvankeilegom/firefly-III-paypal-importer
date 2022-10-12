@@ -38,7 +38,6 @@ RUN mkdir -p /data
 
 # Define volumes
 VOLUME /data
-VOLUME /var/www/html
 
 # Set the working directory
 WORKDIR /var/www/html
