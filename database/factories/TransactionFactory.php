@@ -41,6 +41,16 @@ class TransactionFactory extends Factory
         });
     }
 
+    public function revenue()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'event_code' => 'T0006',
+                'value'      => $this->faker->randomFloat(2, -10, -1000),
+            ];
+        });
+    }
+
     public function expense()
     {
         return $this->state(function (array $attributes) {

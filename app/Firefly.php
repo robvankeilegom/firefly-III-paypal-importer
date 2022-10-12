@@ -162,11 +162,20 @@ class Firefly
 
         if (! is_null($transaction->firefly_id)) {
             // Transaction exists, update it and return the response
-            $response = $this->client->put('transactions/' . $transaction->firefly_id, [
-                'json' => $data,
-            ]);
+            try {
+                $response = $this->client->put('transactions/' . $transaction->firefly_id, [
+                    'json' => $data,
+                ]);
 
-            return true;
+                return true;
+            } catch (ClientException $e) {
+                // If there's no response or the response isn't 404, throw the error anyway
+                if (! $e->hasResponse() || 404 !== $e->getResponse()->getStatusCode()) {
+                    throw $e;
+                }
+
+                // Got a 404 response. Don't do anything so the transaction gets POST-ed
+            }
         }
 
         // Create a new transaction
@@ -183,7 +192,7 @@ class Firefly
                 // Check if the response has an 'errors' property.
                 // If so we can print out a more detailed error than the one
                 // firefly provides
-                if (property_exists($error, 'errors')) {
+                if (property_exists($response, 'errors')) {
                     $error = Arr::get(current($response->errors), 0);
                 }
             }
@@ -207,7 +216,8 @@ class Firefly
             if (str_starts_with($error, 'Duplicate of transaction ')) {
                 \Log::warning($error);
 
-                return false;
+                // Return true since this isn't really a problem
+                return true;
             }
 
             // TODO: error handling

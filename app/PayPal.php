@@ -13,7 +13,7 @@ class PayPal
      * Sandbox: https://api-m.sandbox.paypal.com/v1/
      * Live: https://api-m.paypal.com/v1/
      */
-    private string $baseUri = 'https://api-m.paypal.com/v1/';
+    private string $baseUri;
 
     private string $clientId;
 
@@ -23,6 +23,7 @@ class PayPal
 
     public function __construct()
     {
+        $this->baseUri      = config('services.paypal.uri');
         $this->clientId     = config('services.paypal.client_id');
         $this->clientSecret = config('services.paypal.client_secret');
 

@@ -19,13 +19,86 @@ steps:
       - composer global require "squizlabs/php_codesniffer" --working-dir=/root/tools/phpcbf
       - composer global require "friendsofphp/php-cs-fixer" --working-dir=/root/tools/php-cs-fixer
 
+  - name: Wait for mysql
+    image: mysql:5.7
+    commands:
+      - while ! mysqladmin ping -h mysql -u root -proot --silent; do sleep 1; done
+    depends_on:
+      - mysql
+
+  - name: firefly
+    image: fireflyiii/core
+    detach: true
+    environment:
+      APP_KEY: EUKY9laCopF9bkGDF9xvZyClzUAob7Yc
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_CONNECTION: mysql
+      DB_DATABASE: firefly
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      APP_ENV: testing
+    commands:
+      - cd /var/www/html/
+        # Remove "exec apache2-foreground" from the entry point script
+      - head -n -1 /usr/local/bin/entrypoint.sh > tmp.txt && mv tmp.txt /usr/local/bin/entrypoint.sh
+      - chmod +x /usr/local/bin/entrypoint.sh
+      - bash /usr/local/bin/entrypoint.sh
+      - php artisan firefly-iii:create-first-user testing@robvankeilegom.be
+      - apache2-foreground
+    depends_on:
+      - Wait for mysql
+
+  - name: Wait for firefly
+    image: alpine/curl
+    commands:
+      - while ! curl firefly:8080 ; do sleep 1 ; done
+    depends_on:
+      - firefly
+
+  - name: Add oauth client
+    image: mysql:5.7
+    commands:
+      # Create new oauth client with a known id
+      - mysql -h mysql -u root -proot -e "INSERT INTO firefly.oauth_clients (id, user_id, name, secret, redirect, personal_access_client, password_client, revoked, created_at, updated_at, provider) VALUES (3, NULL, 'Firefly III Password Access Client', '2C1EMlc8wiMpcheWOGi0829puwgFutt6TjDsptM2', 'http://localhost', '0', '1', '0', '2022-01-01 00:00:00', '2022-01-01 00:00:00', 'users');"
+
+        # Create asset account for PayPal
+      - mysql -h mysql -u root -proot -e "INSERT INTO firefly.accounts (id, created_at, updated_at, deleted_at, user_id, user_group_id, account_type_id, name, virtual_balance, iban, active, encrypted, \\`order\\`) VALUES ('1', '2022-01-01 00:00:00', '2022-01-01 00:00:00', NULL, '1', NULL, '3', 'Paypal', NULL, NULL, '1', '0', '0');"
+
+
+        # Set password equal to H0plcPOsi5LDmBKxPTBUdubj
+      - mysql -h mysql -u root -proot -e "UPDATE firefly.users SET password = '\$2y\$10\$Y10M8.t2HhRk0JY5fqfJc.fS9GORgDgvywcwd35jiu0/EJnSFkvui';"
+    depends_on:
+      - Wait for firefly
+
+  - name: Create Personal Access Token
+    image: alpine
+    commands:
+      - apk --no-cache add curl jq
+      - |
+        curl -fsSL --request POST 'http://firefly:8080/oauth/token' \\
+        --header 'Accept: application/json' \\
+        --form 'grant_type="password"' \\
+        --form 'client_id="3"' \\
+        --form 'client_secret="2C1EMlc8wiMpcheWOGi0829puwgFutt6TjDsptM2"' \\
+        --form 'username="testing@robvankeilegom.be"' \\
+        --form 'password="H0plcPOsi5LDmBKxPTBUdubj"' | jq '.access_token' > token.txt
+      - echo -e "FIREFLY_TOKEN=$(cat token.txt)" > .env
+    depends_on:
+      - Add oauth client
+
   - name: Run tests
     image: php:8.1
+    environment:
+      FIREFLY_URI: 'firefly:8080'
+      FIREFLY_PAYPAL_ACCOUNT_ID: '1'
     commands:
+      - . ./.env
       - mkdir -p /data
       - touch /data/database.sqlite
       - vendor/bin/pest
     depends_on:
+      - Create Personal Access Token
       - Install packages
 
   - name: Run linter
@@ -53,6 +126,13 @@ volumes:
 - name: tools
   temp: {}
 
+
+services:
+  - name: mysql
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: firefly
+      MYSQL_ROOT_PASSWORD: root
 
 ---
 kind: pipeline
