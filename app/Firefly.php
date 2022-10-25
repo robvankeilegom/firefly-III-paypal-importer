@@ -128,7 +128,8 @@ class Firefly
             $conversion = $transaction;
 
             // Get the transaction from the same moment in the active currency
-            $transaction = Transaction::where('initiation_date', $transaction->initiation_date)
+            $transaction = Transaction::where('reference_id', $conversion->pp_id)
+                // where('initiation_date', $transaction->initiation_date)
                 ->where('event_code', 'T0200')
                 ->where('currency', $this->currency)
                 ->firstOrFail();
