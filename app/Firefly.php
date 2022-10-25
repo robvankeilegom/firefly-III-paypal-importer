@@ -132,7 +132,13 @@ class Firefly
                 // where('initiation_date', $transaction->initiation_date)
                 ->where('event_code', 'T0200')
                 ->where('currency', $this->currency)
-                ->firstOrFail();
+                ->first();
+
+            if (is_null($transaction)) {
+                \Log::error('Can\'t find conversion for transaction ' . $conversion->id);
+
+                return false;
+            }
         }
 
         $data = [
