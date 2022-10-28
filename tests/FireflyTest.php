@@ -138,5 +138,5 @@ it('can\'t push a transaction with unknown currency', function () {
 
     $response = $this->firefly->push($transaction);
 
-    expect($response)->not->toBeFalse();
+    expect($response)->toBeFalse();
 });
