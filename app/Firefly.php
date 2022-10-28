@@ -139,6 +139,21 @@ class Firefly
 
                 return false;
             }
+
+            // Make sure the currency we're converting from is valid.
+            $exists = $this->validateCurrency($conversion->currency);
+
+            if (false === $exists) {
+                \Log::error(
+                    'Couldn\'t push transaction: '
+                    . $conversion->id
+                    . '. Currency \''
+                    . ${$conversion}->currency
+                    . '\' doesn\'t exist.'
+                );
+
+                return false;
+            }
         }
 
         $data = [
@@ -281,6 +296,29 @@ class Firefly
         ]);
 
         return json_decode($response->getBody());
+    }
+
+    private function validateCurrency(string $currency): bool
+    {
+        $currency = 'lala';
+
+        if (empty($currency)) {
+            return false;
+        }
+
+        try {
+            $response = $this->client->get('currencies/' . $currency);
+        } catch (ClientException $e) {
+            // If there's no response or the response isn't 404, throw the error anyway
+            if (! $e->hasResponse() || 404 !== $e->getResponse()->getStatusCode()) {
+                throw $e;
+            }
+
+            // Got a 404 response. The currency doesn't exist.
+            return false;
+        }
+
+        return true;
     }
 
     private function findAccountByName(string $name, string $type): string
