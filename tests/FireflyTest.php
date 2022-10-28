@@ -124,3 +124,19 @@ it('can push a refund', function () {
 
     expect($response)->not->toBeFalse();
 });
+
+// Make sure there is no error thrown.
+it('can\'t push a transaction with unknown currency', function () {
+    $payer = Payer::factory()->create();
+
+    $transaction = Transaction::factory()
+        ->for($payer)
+        ->expense()
+        ->create();
+
+    $transaction->currency = 'non-existent';
+
+    $response = $this->firefly->push($transaction);
+
+    expect($response)->not->toBeFalse();
+});
