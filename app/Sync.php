@@ -12,15 +12,13 @@ class Sync
 
     private Firefly $firefly;
 
-    public function __construct()
-    {
-        $this->paypal  = new PayPal();
-        $this->firefly = new Firefly();
-    }
-
     // Loads transactions from PayPal and stores them
     public function syncPayPal(Carbon $date = null): void
     {
+        if (! isset($this->paypal)) {
+            $this->paypal = new PayPal();
+        }
+
         if (is_null($date)) {
             $date = Carbon::now();
         }
@@ -111,6 +109,10 @@ class Sync
 
     public function syncFirefly()
     {
+        if (! isset($this->firefly)) {
+            $this->firefly = new Firefly();
+        }
+
         foreach (Transaction::all() as $transaction) {
             $this->firefly->push($transaction);
         }

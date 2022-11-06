@@ -33,7 +33,7 @@ To start importing data you'll need a couple of things:
 ## Install / Setup
 
 ### Docker
-You can run the importer in a docker container. This is the easiest and fastest way to get up and running. Don't forget to enter the correct `env` values. The container will run the sync command every night at midnight.
+You can run the importer in a docker container. This is the easiest and fastest way to get up and running. Don't forget to enter the correct `env` values.
 
 ```bash
 docker run \
