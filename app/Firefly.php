@@ -148,7 +148,7 @@ class Firefly
                     'Couldn\'t push transaction: '
                     . $conversion->id
                     . '. Currency \''
-                    . ${$conversion}->currency
+                    . $conversion->currency
                     . '\' doesn\'t exist.'
                 );
 
