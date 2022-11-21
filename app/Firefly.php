@@ -298,8 +298,6 @@ class Firefly
 
     private function validateCurrency(string $currency): bool
     {
-        $currency = 'lala';
-
         if (empty($currency)) {
             return false;
         }
