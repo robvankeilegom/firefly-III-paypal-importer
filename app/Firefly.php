@@ -20,8 +20,12 @@ class Firefly
     // Guzzle client
     private Client $client;
 
+    private string $tag;
+
     public function __construct()
     {
+        $this->tag = date('Ymd-His', time());
+
         $this->client = new Client([
             'base_uri' => rtrim(config('services.firefly.uri'), '/') . '/api/v1/',
             'headers'  => [
@@ -171,6 +175,7 @@ class Firefly
                     // 'destination_name'   =>,
                     'notes'       => $transaction->description,
                     'external_id' => $transaction->pp_id,
+                    'tags'        => [$this->tag],
                 ],
             ],
         ];
