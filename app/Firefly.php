@@ -2,8 +2,6 @@
 
 namespace App;
 
-use stdClass;
-use RuntimeException;
 use GuzzleHttp\Client;
 use App\Models\Transaction;
 use Illuminate\Support\Arr;
@@ -285,7 +283,7 @@ class Firefly
         return false;
     }
 
-    protected function createAccount(string $name, string $direction, string $email): stdClass
+    protected function createAccount(string $name, string $direction, string $email): \stdClass
     {
         $response = $this->client->post('accounts', [
             'json' => [
@@ -300,8 +298,6 @@ class Firefly
 
     private function validateCurrency(string $currency): bool
     {
-        $currency = 'lala';
-
         if (empty($currency)) {
             return false;
         }
@@ -357,7 +353,7 @@ class Firefly
         }
 
         // Not sure what to do.
-        throw new RuntimeException(
+        throw new \RuntimeException(
             'Got ' . $count . ' results from search/accounts. Expected 1 result. q: ' . $name . ' type: ' . $type
         );
     }
