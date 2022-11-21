@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'version' => '0.2.10',
+    'version' => '0.2.11',
 
     'currency' => env('CURRENCY', 'EUR'),
 ];
