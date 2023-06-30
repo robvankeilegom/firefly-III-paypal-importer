@@ -139,7 +139,7 @@ class Firefly
 
             // Get the transaction from the same moment in the active currency
             $transaction = Transaction::where('reference_id', $reference)
-                // where('initiation_date', $transaction->initiation_date)
+                ->where('initiation_date', $transaction->initiation_date)
                 ->where('event_code', 'T0200')
                 ->where('currency', $this->currency)
                 ->first();
