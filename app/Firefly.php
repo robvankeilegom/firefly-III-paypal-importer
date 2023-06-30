@@ -5,7 +5,6 @@ namespace App;
 use GuzzleHttp\Client;
 use App\Models\Transaction;
 use Illuminate\Support\Arr;
-use Carbon\Exceptions\Exception;
 use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
@@ -129,9 +128,17 @@ class Firefly
         if ($transaction->currency !== $this->currency) {
             $conversion = $transaction;
 
+            $reference = $conversion->pp_id;
+
+            // For refunds, the reference_id of the conversion id the id of the original transaction
+            // Which is the reference_id on the refund.
+            if ($conversion->is_refund) {
+                $reference = $conversion->reference_id;
+            }
+
             // Get the transaction from the same moment in the active currency
-            $transaction = Transaction::where('reference_id', $conversion->pp_id)
-                // where('initiation_date', $transaction->initiation_date)
+            $transaction = Transaction::where('reference_id', $reference)
+                ->where('initiation_date', $transaction->initiation_date)
                 ->where('event_code', 'T0200')
                 ->where('currency', $this->currency)
                 ->first();
