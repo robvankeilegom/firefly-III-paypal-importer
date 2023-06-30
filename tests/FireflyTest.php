@@ -145,18 +145,20 @@ it('can push a refund in a foreign currency', function () {
 
     // Conversion in usd
     Transaction::factory([
-        'currency'     => 'USD',
-        'reference_id' => $transaction->pp_id,
-        'value'        => $usd * -1, // Make value positive
+        'currency'        => 'USD',
+        'reference_id'    => $transaction->pp_id,
+        'initiation_date' => $transaction->initiation_date,
+        'value'           => $usd * -1, // Make value positive
     ])
         ->conversion()
         ->create();
 
     // Conversion in EUR
     Transaction::factory([
-        'currency'     => 'EUR',
-        'reference_id' => $transaction->pp_id,
-        'value'        => $eur,
+        'currency'        => 'EUR',
+        'reference_id'    => $transaction->pp_id,
+        'initiation_date' => $transaction->initiation_date,
+        'value'           => $eur,
     ])
         ->conversion()
         ->create();
@@ -178,18 +180,20 @@ it('can push a refund in a foreign currency', function () {
 
     // Conversion in usd
     Transaction::factory([
-        'currency'     => 'USD',
-        'reference_id' => $transaction->pp_id,
-        'value'        => $usd * -1, // Make value positive
+        'currency'        => 'USD',
+        'reference_id'    => $transaction->pp_id,
+        'initiation_date' => $refund->initiation_date,
+        'value'           => $usd * -1, // Make value positive
     ])
         ->conversion()
         ->create();
 
     // Conversion in EUR
     Transaction::factory([
-        'currency'     => 'EUR',
-        'reference_id' => $transaction->pp_id,
-        'value'        => $eur,
+        'currency'        => 'EUR',
+        'reference_id'    => $transaction->pp_id,
+        'initiation_date' => $refund->initiation_date,
+        'value'           => $eur,
     ])
         ->conversion()
         ->create();
