@@ -27,16 +27,22 @@ class TransactionFactory extends Factory
             'event_code'      => 'T0006',
             'initiation_date' => $this->faker->dateTimeBetween('-10 week', 'now'),
             'currency'        => 'EUR',
-            'value'           => $this->faker->randomFloat(2, 10, 1000),
+            'value'           => $this->faker->randomFloat(2, -10, -1000),
             'description'     => '',
         ];
     }
 
-    public function refund()
+    public function refund(Transaction $original, int $value = null)
     {
-        return $this->state(function (array $attributes) {
+        if (is_null($value)) {
+            $value = $original->value * -1;
+        }
+
+        return $this->state(function (array $attributes) use ($original, $value) {
             return [
-                'event_code' => 'T1106',
+                'event_code'   => 'T1106',
+                'reference_id' => $original->pp_id,
+                'value'        => $value,
             ];
         });
     }
@@ -46,7 +52,7 @@ class TransactionFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'event_code' => 'T0006',
-                'value'      => $this->faker->randomFloat(2, -10, -1000),
+                'value'      => $this->faker->randomFloat(2, 10, 1000),
             ];
         });
     }
@@ -56,6 +62,15 @@ class TransactionFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'event_code' => 'T0006',
+            ];
+        });
+    }
+
+    public function conversion()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'event_code' => 'T0200',
             ];
         });
     }

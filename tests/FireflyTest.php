@@ -115,12 +115,86 @@ it('can push the same transaction twice', function () {
 it('can push a refund', function () {
     $payer = Payer::factory()->create();
 
+    // Original transaction
     $transaction = Transaction::factory()
         ->for($payer)
-        ->refund()
         ->create();
 
-    $response = $this->firefly->push($transaction);
+    $refund = Transaction::factory()
+        ->for($payer)
+        ->refund($transaction)
+        ->create();
+
+    $response = $this->firefly->push($refund);
+
+    expect($response)->not->toBeFalse();
+});
+
+it('can push a refund in a foreign currency', function () {
+    $payer = Payer::factory()->create();
+
+    // Original transaction
+    $transaction = Transaction::factory([
+        'currency' => 'USD',
+    ])
+        ->for($payer)
+        ->create();
+
+    $usd = $transaction->value;
+    $eur = $usd * 0.9; // Give or take
+
+    // Conversion in usd
+    Transaction::factory([
+        'currency'     => 'USD',
+        'reference_id' => $transaction->pp_id,
+        'value'        => $usd * -1, // Make value positive
+    ])
+        ->conversion()
+        ->create();
+
+    // Conversion in EUR
+    Transaction::factory([
+        'currency'     => 'EUR',
+        'reference_id' => $transaction->pp_id,
+        'value'        => $eur,
+    ])
+        ->conversion()
+        ->create();
+
+    // This was the original transaction, now generate the refund
+
+    // Refund only half
+    $value = $transaction->value * 0.5 * -1;
+
+    $refund = Transaction::factory([
+        'currency' => 'USD',
+    ])
+        ->for($payer)
+        ->refund($transaction, $value)
+        ->create();
+
+    $usd = $refund->value;
+    $eur = $usd * 0.9; // Give or take
+
+    // Conversion in usd
+    Transaction::factory([
+        'currency'     => 'USD',
+        'reference_id' => $transaction->pp_id,
+        'value'        => $usd * -1, // Make value positive
+    ])
+        ->conversion()
+        ->create();
+
+    // Conversion in EUR
+    Transaction::factory([
+        'currency'     => 'EUR',
+        'reference_id' => $transaction->pp_id,
+        'value'        => $eur,
+    ])
+        ->conversion()
+        ->create();
+
+    $response = $this->firefly->push($refund);
 
     expect($response)->not->toBeFalse();
 });
