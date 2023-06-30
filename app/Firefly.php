@@ -5,7 +5,6 @@ namespace App;
 use GuzzleHttp\Client;
 use App\Models\Transaction;
 use Illuminate\Support\Arr;
-use Carbon\Exceptions\Exception;
 use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
