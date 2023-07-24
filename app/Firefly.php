@@ -65,7 +65,7 @@ class Firefly
             // Revenue or refund
             $direction = 'revenue';
 
-            // Transaction is a deposit. So the destiniation will be the paypal account
+            // Transaction is a deposit. So the destination will be the paypal account
             $destination = intval(config('services.firefly.account'));
         }
 
