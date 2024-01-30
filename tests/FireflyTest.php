@@ -219,7 +219,6 @@ it('can\'t push a transaction with unknown currency', function () {
     expect($response)->toBeFalse();
 });
 
-
 it('can push a transaction with a >1000 long description', function () {
     $payer = Payer::factory()->create();
 

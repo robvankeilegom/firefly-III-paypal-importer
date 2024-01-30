@@ -215,7 +215,7 @@ class Firefly
             $response = $this->client->post('transactions', [
                 'json' => $data,
             ]);
-        } catch (TransferException|RequestException $e) {
+        } catch (RequestException|TransferException $e) {
             $error = '';
 
             if ($e->hasResponse()) {
