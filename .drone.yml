@@ -102,7 +102,7 @@ steps:
       - Install packages
 
   - name: Run linter
-    image: php:8.1
+    image: php:8.2
     volumes:
       - name: tools
         path: /root/tools
