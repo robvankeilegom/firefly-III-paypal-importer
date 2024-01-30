@@ -218,3 +218,20 @@ it('can\'t push a transaction with unknown currency', function () {
 
     expect($response)->toBeFalse();
 });
+
+
+it('can push a transaction with a >1000 long description', function () {
+    $payer = Payer::factory()->create();
+
+    $transaction = Transaction::factory()
+        ->for($payer)
+        ->expense()
+        ->create();
+
+    // Create a 4000 chr long description
+    $transaction->description = str_repeat('test', 1000);
+
+    $response = $this->firefly->push($transaction);
+
+    expect($response)->not->toBeFalse();
+});
