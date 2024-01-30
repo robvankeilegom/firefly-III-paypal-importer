@@ -52,7 +52,7 @@ steps:
   - name: Wait for firefly
     image: alpine/curl
     commands:
-      - while ! curl firefly:8080 ; do sleep 1 ; done
+      - while ! curl firefly ; do sleep 1 ; done
     depends_on:
       - firefly
 
@@ -76,7 +76,7 @@ steps:
     commands:
       - apk --no-cache add curl jq
       - |
-        curl -fsSL --request POST 'http://firefly:8080/oauth/token' \\
+        curl -fsSL --request POST 'http://firefly/oauth/token' \\
         --header 'Accept: application/json' \\
         --form 'grant_type="password"' \\
         --form 'client_id="3"' \\
@@ -90,7 +90,7 @@ steps:
   - name: Run tests
     image: php:8.1
     environment:
-      FIREFLY_URI: 'firefly:8080'
+      FIREFLY_URI: 'firefly'
       FIREFLY_PAYPAL_ACCOUNT_ID: '1'
     commands:
       - . ./.env
