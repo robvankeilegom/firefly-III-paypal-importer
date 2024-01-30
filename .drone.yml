@@ -27,7 +27,7 @@ steps:
       - mysql
 
   - name: firefly
-    image: fireflyiii/core
+    image: fireflyiii/core:version-5.7.18
     detach: true
     environment:
       APP_KEY: EUKY9laCopF9bkGDF9xvZyClzUAob7Yc
