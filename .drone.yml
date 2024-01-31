@@ -27,7 +27,7 @@ steps:
       - mysql
 
   - name: firefly
-    image: fireflyiii/core:version-5.7.18
+    image: fireflyiii/core
     detach: true
     environment:
       APP_KEY: EUKY9laCopF9bkGDF9xvZyClzUAob7Yc
@@ -50,7 +50,7 @@ steps:
       - Wait for mysql
 
   - name: Wait for firefly
-    image: alpine/curl
+    image: curlimages/curl
     commands:
       - while ! curl firefly:8080 ; do sleep 1 ; done
     depends_on:
