@@ -72,7 +72,7 @@ steps:
       - Wait for firefly
 
   - name: Create Personal Access Token
-    image: alpine
+    image: alpine:3.18
     commands:
       - apk --no-cache add curl jq
       - |
