@@ -174,7 +174,7 @@ class Firefly
                     'type'           => $type,
                     'date'           => $transaction->initiation_date->toAtomString(),
                     'amount'         => abs($transaction->value),
-                    'description'    => $transaction->description ?: $transaction->pp_id,
+                    'description'    => substr($transaction->description, 0, 1000) ?: $transaction->pp_id,
                     'order'          => 0,
                     'currency_code'  => $this->currency,
                     'source_id'      => $source,
@@ -215,7 +215,7 @@ class Firefly
             $response = $this->client->post('transactions', [
                 'json' => $data,
             ]);
-        } catch (TransferException|RequestException $e) {
+        } catch (RequestException|TransferException $e) {
             $error = '';
 
             if ($e->hasResponse()) {

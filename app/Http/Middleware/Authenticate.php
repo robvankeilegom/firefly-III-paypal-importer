@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use Illuminate\Http\Request;
+use Illuminate\Contracts\Auth\Factory;
 use Illuminate\Contracts\Auth\Factory as Auth;
 
 class Authenticate
@@ -9,7 +11,7 @@ class Authenticate
     /**
      * The authentication guard factory instance.
      *
-     * @var \Illuminate\Contracts\Auth\Factory
+     * @var Factory
      */
     protected $auth;
 
@@ -24,7 +26,7 @@ class Authenticate
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @param  null|string  $guard
      *
      * @return mixed
