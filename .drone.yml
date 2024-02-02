@@ -50,7 +50,7 @@ steps:
       - Wait for mysql
 
   - name: Wait for firefly
-    image: alpine/curl
+    image: curlimages/curl
     commands:
       - while ! curl firefly:8080 ; do sleep 1 ; done
     depends_on:
@@ -59,20 +59,23 @@ steps:
   - name: Add oauth client
     image: mysql:5.7
     commands:
+
+      - mysql -h mysql -u root -proot -e "INSERT INTO firefly.user_groups (id, created_at, updated_at, deleted_at, title) VALUES (null, '2022-01-01 00:00:00', '2022-01-01 00:00:00', NULL, 'testing@robvankeilegom.be');"
+
       # Create new oauth client with a known id
-      - mysql -h mysql -u root -proot -e "INSERT INTO firefly.oauth_clients (id, user_id, name, secret, redirect, personal_access_client, password_client, revoked, created_at, updated_at, provider) VALUES (3, NULL, 'Firefly III Password Access Client', '2C1EMlc8wiMpcheWOGi0829puwgFutt6TjDsptM2', 'http://localhost', '0', '1', '0', '2022-01-01 00:00:00', '2022-01-01 00:00:00', 'users');"
+      - mysql -h mysql -u root -proot -e "INSERT INTO firefly.oauth_clients (id, user_id, name, secret, redirect, personal_access_client, password_client, revoked, created_at, updated_at, provider) VALUES (3, 1, 'Firefly III Password Access Client', '2C1EMlc8wiMpcheWOGi0829puwgFutt6TjDsptM2', 'http://localhost', '0', '1', '0', '2022-01-01 00:00:00', '2022-01-01 00:00:00', 'users');"
 
         # Create asset account for PayPal
-      - mysql -h mysql -u root -proot -e "INSERT INTO firefly.accounts (id, created_at, updated_at, deleted_at, user_id, user_group_id, account_type_id, name, virtual_balance, iban, active, encrypted, \\`order\\`) VALUES ('1', '2022-01-01 00:00:00', '2022-01-01 00:00:00', NULL, '1', NULL, '3', 'Paypal', NULL, NULL, '1', '0', '0');"
-
+      - mysql -h mysql -u root -proot -e "INSERT INTO firefly.accounts (id, created_at, updated_at, deleted_at, user_id, user_group_id, account_type_id, name, virtual_balance, iban, active, encrypted) VALUES ('1', '2022-01-01 00:00:00', '2022-01-01 00:00:00', NULL, '1', NULL, '3', 'Paypal', NULL, NULL, '1', '0');"
 
         # Set password equal to H0plcPOsi5LDmBKxPTBUdubj
-      - mysql -h mysql -u root -proot -e "UPDATE firefly.users SET password = '\$2y\$10\$Y10M8.t2HhRk0JY5fqfJc.fS9GORgDgvywcwd35jiu0/EJnSFkvui';"
+      - mysql -h mysql -u root -proot -e "UPDATE firefly.users SET password = '\$2y\$10\$Y10M8.t2HhRk0JY5fqfJc.fS9GORgDgvywcwd35jiu0/EJnSFkvui', user_group_id = 1;"
+
     depends_on:
       - Wait for firefly
 
   - name: Create Personal Access Token
-    image: alpine
+    image: alpine:3.18
     commands:
       - apk --no-cache add curl jq
       - |
@@ -102,7 +105,7 @@ steps:
       - Install packages
 
   - name: Run linter
-    image: php:8.1
+    image: php:8.2
     volumes:
       - name: tools
         path: /root/tools

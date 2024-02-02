@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -37,7 +38,7 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      *
      * @throws \Throwable
      *

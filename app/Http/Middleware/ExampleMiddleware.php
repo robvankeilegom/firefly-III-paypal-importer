@@ -2,12 +2,14 @@
 
 namespace App\Http\Middleware;
 
+use Illuminate\Http\Request;
+
 class ExampleMiddleware
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      *
      * @return mixed
      */
