@@ -9,3 +9,4 @@ database/database.sqlite
 node_modules
 data
 .first_run_done
+token.txt
