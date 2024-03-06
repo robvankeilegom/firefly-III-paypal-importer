@@ -26,6 +26,7 @@ This importer retrieves all your transactions via the PayPal API and loads them 
 
 ## Getting Started
 To start importing data you'll need a couple of things:
+- A PayPal Business account. Read #10 and #16. Afaik there's no downside for switching to a business account. You don't need a business to have a business account.
 - A PayPal `ClientID` and `ClientSecret`.  These can be generated at the [PayPal Developer Dashboard](https://developer.paypal.com/developer/applications). Make sure to generate a client for **live** transactions. Under `LIVE APP SETTINGS` the only required `App feature options` is `Transaction Search`.
 - A Firefly Personal Access Token. Read more about this [here](https://docs.firefly-iii.org/firefly-iii/api/).
 - The ID of the asset account in Firefly. In Firefly, open `Accounts > Asset Accounts` and click on your PayPal account (or make a PayPal account). In the account overview the ID of the account will be in the URL. Something like: `http://firefly.box/accounts/show/xxx`. Where `xxx` will be the account id.
