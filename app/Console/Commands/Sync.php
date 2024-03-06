@@ -12,7 +12,7 @@ class Sync extends Command
      *
      * @var string
      */
-    protected $signature = 'sync';
+    protected $signature = 'sync {--keep-going}';
 
     /**
      * The console command description.
@@ -26,8 +26,10 @@ class Sync extends Command
      */
     public function handle(): int
     {
+        $keepGoing =  $this->option('keep-going');
+
         // Create a sync instance
-        $client = new AppSync();
+        $client = new AppSync($keepGoing);
 
         $this->info('Start pulling data from PayPal');
 

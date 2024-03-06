@@ -12,9 +12,18 @@ class Sync
 
     private Firefly $firefly;
 
+    private bool $keepGoing;
+
+    public function __construct(bool $keepGoing = false)
+    {
+        $this->keepGoing = $keepGoing;
+    }
+
     // Loads transactions from PayPal and stores them
     public function syncPayPal(Carbon $date = null): void
     {
+        $done = false;
+
         if (! isset($this->paypal)) {
             $this->paypal = new PayPal();
         }
@@ -23,12 +32,18 @@ class Sync
             $date = Carbon::now();
         }
 
+        // PayPal was founded in 1998
+        if ($date->year < 1998) {
+            return;
+        }
+
+        echo $date->month . '/' . $date->year . PHP_EOL;
+
         $records = $this->paypal->getTransactions($date);
 
-        // TODO: not sure if this is correct. What if there's a month without a payment?
         if (is_null($records)) {
-            // We're done
-            return;
+            // Sync the previous month
+            $this->syncPayPal($date->copy()->subMonth());
         }
 
         // Create a database record for each record
@@ -84,16 +99,22 @@ class Sync
             // Remove duplicates. item_details and invoice_id can be the same value.
             $description = array_unique($description);
 
-            $transaction = Transaction::updateOrCreate([
-                'pp_id' => $record->transaction_info->transaction_id,
-            ], [
-                'reference_id'    => $reference,
-                'event_code'      => $record->transaction_info->transaction_event_code,
-                'initiation_date' => $record->transaction_info->transaction_initiation_date,
-                'currency'        => $record->transaction_info->transaction_amount->currency_code,
-                'value'           => $record->transaction_info->transaction_amount->value,
-                'description'     => implode(' | ', $description),
-            ]);
+            $transaction = Transaction::where('pp_id', $record->transaction_info->transaction_id)->first();
+
+            if ($transaction) {
+                // We're only done if the --keep-going options wasn't passed.
+                $done = !$this->keepGoing;
+            } else {
+                $transaction        = new Transaction();
+                $transaction->pp_id = $record->transaction_info->transaction_id;
+            }
+
+            $transaction->reference_id    = $reference;
+            $transaction->event_code      = $record->transaction_info->transaction_event_code;
+            $transaction->initiation_date = $record->transaction_info->transaction_initiation_date;
+            $transaction->currency        = $record->transaction_info->transaction_amount->currency_code;
+            $transaction->value           = $record->transaction_info->transaction_amount->value;
+            $transaction->description     = implode(' | ', $description);
 
             if (! is_null($payer)) {
                 $transaction->payer()->associate($payer);
@@ -101,6 +122,10 @@ class Sync
                 $transaction->payer_id = null;
             }
             $transaction->save();
+        }
+
+        if ($done) {
+            return;
         }
 
         // Sync the previous month
