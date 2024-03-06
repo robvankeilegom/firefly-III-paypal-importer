@@ -39,7 +39,7 @@ You can run the importer in a docker container. This is the easiest and fastest 
 docker run \
     --volume=$PWD/data:/data \
     --publish=8080:80 \
-    --env=FIREFLY_TOKEN=
+    --env=FIREFLY_TOKEN= \
     --env=FIREFLY_URI=firefly:8080 \
     --env=FIREFLY_PAYPAL_ACCOUNT_ID=1 \
     --env=PAYPAL_CLIENT_ID= \
