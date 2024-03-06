@@ -26,7 +26,7 @@ class Sync extends Command
      */
     public function handle(): int
     {
-        $keepGoing =  $this->option('keep-going');
+        $keepGoing = $this->option('keep-going');
 
         // Create a sync instance
         $client = new AppSync($keepGoing);

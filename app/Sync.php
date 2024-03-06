@@ -103,7 +103,7 @@ class Sync
 
             if ($transaction) {
                 // We're only done if the --keep-going options wasn't passed.
-                $done = !$this->keepGoing;
+                $done = ! $this->keepGoing;
             } else {
                 $transaction        = new Transaction();
                 $transaction->pp_id = $record->transaction_info->transaction_id;

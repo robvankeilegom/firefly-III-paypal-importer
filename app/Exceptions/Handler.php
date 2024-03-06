@@ -3,6 +3,8 @@
 namespace App\Exceptions;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -42,7 +44,7 @@ class Handler extends ExceptionHandler
      *
      * @throws \Throwable
      *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     * @return JsonResponse|Response
      */
     public function render($request, \Throwable $exception)
     {
