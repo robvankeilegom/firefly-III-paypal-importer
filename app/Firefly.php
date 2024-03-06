@@ -95,13 +95,17 @@ class Firefly
             } catch (RequestException $e) {
                 // If a request exception is thrown, it could be because the account already exists
                 // This happens if the account was already created be another importer or created manually
+                $response = null;
+
                 if ($e->hasResponse()) {
                     $response = json_decode($e->getResponse()->getBody(), true);
+                }
 
-                    if ('This account name is already in use.' === Arr::get($response, 'errors.name.0')) {
-                        // Find the account by name
-                        $fireflyId = $this->findAccountByName($payer->name, $direction);
-                    }
+                if ('This account name is already in use.' === Arr::get($response, 'errors.name.0')) {
+                    // Find the account by name
+                    $fireflyId = $this->findAccountByName($payer->name, $direction);
+                } else {
+                    throw $e;
                 }
             }
 
