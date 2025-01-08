@@ -186,10 +186,13 @@ class Firefly
                     // 'destination_name'   =>,
                     'notes'       => $transaction->description,
                     'external_id' => $transaction->pp_id,
-                    'tags'        => [$this->tag],
                 ],
             ],
         ];
+
+        if (config('app.enable_tags')) {
+            $data['transactions'][0]['tags'] = [$this->tag];
+        }
 
         if (! is_null($conversion)) {
             $data['transactions'][0]['foreign_amount']        = abs($conversion->value);
