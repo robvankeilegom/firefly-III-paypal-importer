@@ -19,11 +19,13 @@ class Firefly
     // Guzzle client
     private Client $client;
 
-    private string $tag;
+    private string $dateTag;
+    private string $baseTag;
 
     public function __construct()
     {
-        $this->tag = date('Ymd-His', time());
+        $this->baseTag = "paypal-importer";
+        $this->dateTag = date('Ymd-His', time());
 
         $this->client = new Client([
             'base_uri' => rtrim(config('services.firefly.uri'), '/') . '/api/v1/',
@@ -84,29 +86,11 @@ class Firefly
         // We haven't pushed the payer as a expense/revenue account yet,
         // create it first
         if (is_null($payer->{$property})) {
-            $fireflyId = 0;
+            $fireflyId = $this->findAccountByName($payer->name, $direction);
 
-            try {
-                // Create a new payer account in Firefly
-                $response = $this->createAccount($payer->name, $direction, $payer->email);
-
-                // Get the id of the newly created account.
-                $fireflyId = $response->data->id;
-            } catch (RequestException $e) {
-                // If a request exception is thrown, it could be because the account already exists
-                // This happens if the account was already created be another importer or created manually
-                $response = null;
-
-                if ($e->hasResponse()) {
-                    $response = json_decode($e->getResponse()->getBody(), true);
-                }
-
-                if ('This account name is already in use.' === Arr::get($response, 'errors.name.0')) {
-                    // Find the account by name
-                    $fireflyId = $this->findAccountByName($payer->name, $direction);
-                } else {
-                    throw $e;
-                }
+            // No Account found, create it
+            if (0 === $fireflyId) {
+                $fireflyId = $this->createAccountByName($payer, $direction);
             }
 
             $payer->{$property} = $fireflyId;
@@ -191,7 +175,7 @@ class Firefly
         ];
 
         if (config('app.enable_tags')) {
-            $data['transactions'][0]['tags'] = [$this->tag];
+            $data['transactions'][0]['tags'] = [$this->baseTag, $this->dateTag];
         }
 
         if (! is_null($conversion)) {
@@ -350,6 +334,11 @@ class Firefly
 
         $count = count($response->data);
 
+        // No account found
+        if (0 === $count) {
+            return 0;
+        }
+
         // There's only one account, return it.
         if (1 === $count) {
             return $response->data[0]->id;
@@ -375,5 +364,31 @@ class Firefly
         throw new \RuntimeException(
             'Got ' . $count . ' results from search/accounts. Expected 1 result. q: ' . $name . ' type: ' . $type
         );
+    }
+
+    private function createAccountByName(string $payer, string $direction):string
+    {
+        try {
+            // Create a new payer account in Firefly
+            $response = $this->createAccount($payer->name, $direction, $payer->email);
+
+            // Get the id of the newly created account.
+            $fireflyId = $response->data->id;
+        } catch (RequestException $e) {
+            // If a request exception is thrown, it could be because the account already exists
+            // This happens if the account was already created be another importer or created manually
+            $response = null;
+
+            if ($e->hasResponse()) {
+                $response = json_decode($e->getResponse()->getBody(), true);
+            }
+
+            if ('This account name is already in use.' === Arr::get($response, 'errors.name.0')) {
+                // Find the account by name
+                $fireflyId = $this->findAccountByName($payer->name, $direction);
+            } else {
+                throw $e;
+            }
+        }
     }
 }
