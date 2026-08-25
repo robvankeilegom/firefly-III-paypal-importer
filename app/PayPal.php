@@ -39,6 +39,14 @@ class PayPal
         $start = $date->copy()->startOfMonth();
         $end   = $date->copy()->endOfMonth();
 
+        // PayPal's Transaction Search only covers the previous three years.
+        // syncPayPal() walks backwards a month at a time and relies on this
+        // method returning null to know when to stop, so stop at the documented
+        // horizon rather than discovering it through a failed request.
+        if ($start->lt(Carbon::now()->subYears(3)->addDays(2))) {
+            return null;
+        }
+
         try {
             // Get all transactions for the current month
             $response = $this->client->get('reporting/transactions', [
@@ -51,12 +59,33 @@ class PayPal
                 ],
             ]);
         } catch (\Exception $e) {
-            $response = json_decode($e->getResponse()->getBody());
+            $body = null !== $e->getResponse() ? (string) $e->getResponse()->getBody() : '';
+            $err  = json_decode($body);
 
-            if (! empty($response->message) && 'Data for the given start date is not available.' === $response->message) {
-                // We're done here, we've loaded all transactions
+            // Returning null tells the caller to stop walking backwards, so it
+            // must only mean "there is no more data".
+            if (! empty($err->message) && 'Data for the given start date is not available.' === $err->message) {
                 return null;
             }
+
+            // Once the start date passes the three-year mark PayPal answers
+            // INVALID_REQUEST rather than the message above. That was not
+            // handled, so execution fell through to the return below with
+            // $response holding a decoded stdClass and died with
+            // "Call to undefined method stdClass::getBody()".
+            if (! empty($err->name) && 'INVALID_REQUEST' === $err->name) {
+                return null;
+            }
+
+            // A rate limit, an expired token or a PayPal outage is not the same
+            // as running out of history. Silently treating those as "done"
+            // would truncate the import and still look like a clean run, so
+            // fail loudly and say which month failed.
+            throw new \RuntimeException(sprintf(
+                'PayPal returned an unexpected error for %s: %s',
+                $start->format('Y-m'),
+                '' !== $body ? $body : $e->getMessage()
+            ));
         }
 
         return json_decode($response->getBody())->transaction_details;
