@@ -37,6 +37,13 @@ class Sync
             return;
         }
 
+        // Transaction Search only serves the previous three years, so there is
+        // nothing older to walk back to. Without this the loop still runs from
+        // the horizon down to 1998, making hundreds of pointless calls.
+        if ($date->copy()->endOfMonth()->lt(Carbon::now()->subYears(3))) {
+            return;
+        }
+
         echo $date->month . '/' . $date->year . PHP_EOL;
 
         $records = $this->paypal->getTransactions($date);
@@ -44,6 +51,12 @@ class Sync
         if (is_null($records)) {
             // Sync the previous month
             $this->syncPayPal($date->copy()->subMonth());
+
+            // Nothing came back for this month, so there is nothing to iterate.
+            // Falling through left the foreach below to run against null, which
+            // is fatal on PHP 8: "foreach() argument must be of type
+            // array|object, null given".
+            return;
         }
 
         // Create a database record for each record
