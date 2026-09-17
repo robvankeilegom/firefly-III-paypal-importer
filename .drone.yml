@@ -20,7 +20,7 @@ steps:
       - composer global require "friendsofphp/php-cs-fixer" --working-dir=/root/tools/php-cs-fixer
 
   - name: Wait for mysql
-    image: mysql:5.7
+    image: mysql:9.6
     commands:
       - while ! mysqladmin ping -h mysql -u root -proot --silent; do sleep 1; done
     depends_on:
@@ -57,7 +57,7 @@ steps:
       - firefly
 
   - name: Add oauth client
-    image: mysql:5.7
+    image: mysql:9.6
     commands:
 
       - mysql -h mysql -u root -proot -e "INSERT INTO firefly.user_groups (id, created_at, updated_at, deleted_at, title) VALUES (null, '2022-01-01 00:00:00', '2022-01-01 00:00:00', NULL, 'testing@robvankeilegom.be');"
@@ -132,7 +132,7 @@ volumes:
 
 services:
   - name: mysql
-    image: mysql:5.7
+    image: mysql:9.6
     environment:
       MYSQL_DATABASE: firefly
       MYSQL_ROOT_PASSWORD: root
