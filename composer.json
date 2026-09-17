@@ -10,7 +10,7 @@
     "type": "project",
     "require": {
         "php": "^8.0",
-        "guzzlehttp/guzzle": "^7.4",
+        "guzzlehttp/guzzle": "^8.0",
         "laravel/lumen-framework": "^9.0",
         "nesbot/carbon": "^2.58"
     },
