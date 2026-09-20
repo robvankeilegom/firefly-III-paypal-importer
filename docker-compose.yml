@@ -1,7 +1,18 @@
----
-version: '3'
-
 services:
+  db:
+    image: mariadb:lts
+    hostname: db
+    container_name: firefly_iii_db
+    restart: always
+    environment:
+        MYSQL_RANDOM_ROOT_PASSWORD: yes
+        MYSQL_USER: firefly
+        MYSQL_PASSWORD: firefly
+        MYSQL_DATABASE: ff_iii
+    networks:
+      - firefly_iii
+    volumes:
+      - firefly_iii_db:/var/lib/mysql
 
   firefly:
     container_name: firefly
@@ -9,47 +20,67 @@ services:
     restart: always
     volumes:
       - firefly_iii_upload:/var/www/html/storage/upload
-    networks:
-      - user-bridge
     environment:
       APP_KEY: eKT9V6t5eUqT1ROeEt9QzXEygjaJcEzZ
-      DB_HOST: mysql
+      DB_HOST: db
       DB_PORT: 3306
       DB_DATABASE: ff_iii
-      DB_USERNAME: root
-      DB_PASSWORD: root
+      DB_USERNAME: firefly
+      DB_PASSWORD: firefly
     ports:
       - 8001:8080
+    networks:
+      - firefly_iii
 
-  firefly-iii-paypal-importer:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: firefly-iii-paypal-importer
+  paypal-importer-nginx:
+    image: nginx:alpine
+    container_name: paypal-importer-nginx
     restart: unless-stopped
     working_dir: /var/www/html
     ports:
       - 8002:80
     volumes:
-      - $PWD/data:/data
       - .:/var/www/html
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf
     networks:
-      - user-bridge
+      - firefly_iii
+
+  paypal-importer-php:
+    build: .
+    container_name: paypal-importer-php
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+      - ./docker/php-fpm-pool.conf:/usr/local/etc/php-fpm.d/www.conf:ro
     environment:
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: ff_iii_paypal_importer
-      DB_USERNAME: root
-      DB_PASSWORD: root
+      OPCACHE_ENABLE: 0
+      OPCACHE_VALIDATE_TIMESTAMPS: 1
       FIREFLY_TOKEN: ${FIREFLY_TOKEN}
       FIREFLY_URI: ${FIREFLY_URI}
       FIREFLY_PAYPAL_ACCOUNT_ID: ${FIREFLY_PAYPAL_ACCOUNT_ID}
       PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID}
       PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET}
+    networks:
+      - firefly_iii
+
+  paypal-importer-vite:
+    image: node:24
+    container_name: paypal-importer-vite
+    restart: unless-stopped
+    working_dir: /var/www/html
+    ports:
+      - 8003:8003
+    volumes:
+      - .:/var/www/html
+    command: "bash -c 'yarn ; yarn dev'"
+    networks:
+      - firefly_iii
 
 volumes:
-   firefly_iii_upload:
+    firefly_iii_upload:
+    firefly_iii_db:
 
 networks:
-  user-bridge:
-    external: true
+    firefly_iii:
+        driver: bridge

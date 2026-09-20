@@ -2,9 +2,9 @@
 
 namespace App;
 
-use Carbon\Carbon;
 use App\Models\Payer;
 use App\Models\Transaction;
+use Carbon\Carbon;
 
 class Sync
 {
@@ -20,12 +20,12 @@ class Sync
     }
 
     // Loads transactions from PayPal and stores them
-    public function syncPayPal(Carbon $date = null): void
+    public function syncPayPal(?Carbon $date = null): void
     {
         $done = false;
 
         if (! isset($this->paypal)) {
-            $this->paypal = new PayPal();
+            $this->paypal = new PayPal;
         }
 
         if (is_null($date)) {
@@ -44,7 +44,7 @@ class Sync
             return;
         }
 
-        echo $date->month . '/' . $date->year . PHP_EOL;
+        echo $date->month.'/'.$date->year.PHP_EOL;
 
         $records = $this->paypal->getTransactions($date);
 
@@ -76,9 +76,9 @@ class Sync
 
                 $payer = Payer::updateOrCreate([
                     'pp_id' => $record->payer_info->account_id,
-                    'name'  => $name,
+                    'name' => $name,
                 ], [
-                    'email'        => $record->payer_info->email_address ?? '',
+                    'email' => $record->payer_info->email_address ?? '',
                     'country_code' => $record->payer_info->country_code ?? '',
                 ]);
             }
@@ -118,16 +118,16 @@ class Sync
                 // We're only done if the --keep-going options wasn't passed.
                 $done = ! $this->keepGoing;
             } else {
-                $transaction        = new Transaction();
+                $transaction = new Transaction;
                 $transaction->pp_id = $record->transaction_info->transaction_id;
             }
 
-            $transaction->reference_id    = $reference;
-            $transaction->event_code      = $record->transaction_info->transaction_event_code;
+            $transaction->reference_id = $reference;
+            $transaction->event_code = $record->transaction_info->transaction_event_code;
             $transaction->initiation_date = $record->transaction_info->transaction_initiation_date;
-            $transaction->currency        = $record->transaction_info->transaction_amount->currency_code;
-            $transaction->value           = $record->transaction_info->transaction_amount->value;
-            $transaction->description     = implode(' | ', $description);
+            $transaction->currency = $record->transaction_info->transaction_amount->currency_code;
+            $transaction->value = $record->transaction_info->transaction_amount->value;
+            $transaction->description = implode(' | ', $description);
 
             if (! is_null($payer)) {
                 $transaction->payer()->associate($payer);
@@ -148,7 +148,7 @@ class Sync
     public function syncFirefly()
     {
         if (! isset($this->firefly)) {
-            $this->firefly = new Firefly();
+            $this->firefly = new Firefly;
         }
 
         foreach (Transaction::all() as $transaction) {

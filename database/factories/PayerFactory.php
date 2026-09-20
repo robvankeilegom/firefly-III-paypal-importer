@@ -22,9 +22,9 @@ class PayerFactory extends Factory
     public function definition()
     {
         return [
-            'pp_id'        => $this->faker->regexify('[A-Z0-9]{17}'),
-            'email'        => $this->faker->unique()->safeEmail,
-            'name'         => $this->faker->name(),
+            'pp_id' => $this->faker->regexify('[A-Z0-9]{17}'),
+            'email' => $this->faker->unique()->safeEmail,
+            'name' => $this->faker->name(),
             'country_code' => $this->faker->countryCode(),
         ];
     }
