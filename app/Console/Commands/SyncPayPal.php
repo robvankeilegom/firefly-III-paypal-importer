@@ -26,7 +26,7 @@ class SyncPayPal extends Command
      */
     public function handle(): int
     {
-        $client = new AppSync();
+        $client = new AppSync;
 
         $this->info('Start pulling data from PayPal');
 

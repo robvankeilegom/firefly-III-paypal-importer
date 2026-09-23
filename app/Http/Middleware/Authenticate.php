@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Http\Request;
 use Illuminate\Contracts\Auth\Factory;
 use Illuminate\Contracts\Auth\Factory as Auth;
+use Illuminate\Http\Request;
 
 class Authenticate
 {
@@ -28,7 +28,6 @@ class Authenticate
      *
      * @param  Request  $request
      * @param  null|string  $guard
-     *
      * @return mixed
      */
     public function handle($request, \Closure $next, $guard = null)
