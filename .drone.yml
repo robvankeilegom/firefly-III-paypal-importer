@@ -9,7 +9,7 @@ trigger:
 
 steps:
   - name: Install packages
-    image: composer
+    image: composer@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac
     volumes:
       - name: tools
         path: /root/tools
@@ -20,14 +20,14 @@ steps:
       - composer global require "friendsofphp/php-cs-fixer" --working-dir=/root/tools/php-cs-fixer
 
   - name: Wait for mysql
-    image: mysql:5.7
+    image: mysql:5.7@sha256:4bc6bc963e6d8443453676cae56536f4b8156d78bae03c0145cbe47c2aad73bb
     commands:
       - while ! mysqladmin ping -h mysql -u root -proot --silent; do sleep 1; done
     depends_on:
       - mysql
 
   - name: firefly
-    image: fireflyiii/core
+    image: fireflyiii/core@sha256:db249101cac3047b5973946284ad594c698945b8253f0581c5edaccf6b7903d5
     detach: true
     environment:
       APP_KEY: EUKY9laCopF9bkGDF9xvZyClzUAob7Yc
@@ -50,14 +50,14 @@ steps:
       - Wait for mysql
 
   - name: Wait for firefly
-    image: curlimages/curl
+    image: curlimages/curl@sha256:58adaa4e8dca9c988bae2aba4ab3434a0bb2da16bbe3f92dec39ec7785166777
     commands:
       - while ! curl firefly:8080 ; do sleep 1 ; done
     depends_on:
       - firefly
 
   - name: Add oauth client
-    image: mysql:5.7
+    image: mysql:5.7@sha256:4bc6bc963e6d8443453676cae56536f4b8156d78bae03c0145cbe47c2aad73bb
     commands:
 
       - mysql -h mysql -u root -proot -e "INSERT INTO firefly.user_groups (id, created_at, updated_at, deleted_at, title) VALUES (null, '2022-01-01 00:00:00', '2022-01-01 00:00:00', NULL, 'testing@robvankeilegom.be');"
@@ -75,7 +75,7 @@ steps:
       - Wait for firefly
 
   - name: Create Personal Access Token
-    image: alpine:3.18
+    image: alpine:3.18@sha256:de0eb0b3f2a47ba1eb89389859a9bd88b28e82f5826b6969ad604979713c2d4f
     commands:
       - apk --no-cache add curl jq
       - |
@@ -116,7 +116,7 @@ steps:
       - Install packages
 
   - name: Commit changes by linter
-    image: alpine/git
+    image: alpine/git@sha256:a4bb51f1a3553df194ce679fc1db721d8bfba2046fa1a88fe9d4ac551ffbce25
     commands:
       - git add .
       - git diff-index --quiet HEAD || git commit -m "[skip ci] :art:\ Run linters"
@@ -132,7 +132,7 @@ volumes:
 
 services:
   - name: mysql
-    image: mysql:5.7
+    image: mysql:5.7@sha256:4bc6bc963e6d8443453676cae56536f4b8156d78bae03c0145cbe47c2aad73bb
     environment:
       MYSQL_DATABASE: firefly
       MYSQL_ROOT_PASSWORD: root
@@ -152,7 +152,7 @@ trigger:
 
 steps:
   - name: Build Docker container
-    image: docker
+    image: docker@sha256:0b6d18a4a222e71c88be6034926b4f6cde2fc33c2218643d03ccfddc65995470
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
@@ -160,7 +160,7 @@ steps:
       - docker build -t robvankeilegom/firefly-iii-paypal-importer:latest .
 
   - name: Publish Docker container
-    image: docker
+    image: docker@sha256:0b6d18a4a222e71c88be6034926b4f6cde2fc33c2218643d03ccfddc65995470
     environment:
       DOCKER_USER:
         from_secret: docker_username
@@ -193,7 +193,7 @@ trigger:
 
 steps:
   - name: Build Docker container
-    image: docker
+    image: docker@sha256:0b6d18a4a222e71c88be6034926b4f6cde2fc33c2218643d03ccfddc65995470
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
@@ -201,7 +201,7 @@ steps:
       - docker build -t robvankeilegom/firefly-iii-paypal-importer:develop .
 
   - name: Publish Docker container
-    image: docker
+    image: docker@sha256:0b6d18a4a222e71c88be6034926b4f6cde2fc33c2218643d03ccfddc65995470
     environment:
       DOCKER_USER:
         from_secret: docker_username
@@ -232,7 +232,7 @@ trigger:
 
 steps:
   - name: Build Docker container
-    image: docker
+    image: docker@sha256:0b6d18a4a222e71c88be6034926b4f6cde2fc33c2218643d03ccfddc65995470
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
@@ -240,7 +240,7 @@ steps:
       - docker build -t robvankeilegom/firefly-iii-paypal-importer:$DRONE_TAG .
 
   - name: Publish Docker container
-    image: docker
+    image: docker@sha256:0b6d18a4a222e71c88be6034926b4f6cde2fc33c2218643d03ccfddc65995470
     environment:
       DOCKER_USER:
         from_secret: docker_username
