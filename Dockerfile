@@ -29,7 +29,7 @@ RUN sed -i -e "s/html/html\/public/g" /etc/apache2/sites-enabled/000-default.con
 RUN a2enmod rewrite
 
 # Copy Composer binary from the Composer official Docker image
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:latest@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac /usr/bin/composer /usr/bin/composer
 
 COPY docker/000-default.conf /etc/apache2/sites-available/000-default.conf
 
