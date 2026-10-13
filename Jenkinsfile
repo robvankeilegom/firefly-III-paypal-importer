@@ -210,8 +210,6 @@ pipeline {
         stage('Add OAuth Client & Seed DB') {
             steps {
                 sh '''
-                    docker run --rm --network ${NETWORK_NAME} mysql:5.7 mysql -h ${MYSQL_CONTAINER} -u root -proot -e "INSERT INTO firefly.user_groups (id, created_at, updated_at, deleted_at, title) VALUES (null, '2022-01-01 00:00:00', '2022-01-01 00:00:00', NULL, 'testing@robvankeilegom.be');"
-
                     docker run --rm --network ${NETWORK_NAME} mysql:5.7 mysql -h ${MYSQL_CONTAINER} -u root -proot -e "INSERT INTO firefly.oauth_clients (id, user_id, name, secret, redirect, personal_access_client, password_client, revoked, created_at, updated_at, provider) VALUES (3, 1, 'Firefly III Password Access Client', '2C1EMlc8wiMpcheWOGi0829puwgFutt6TjDsptM2', 'http://localhost', '0', '1', '0', '2022-01-01 00:00:00', '2022-01-01 00:00:00', 'users');"
 
                     docker run --rm --network ${NETWORK_NAME} mysql:5.7 mysql -h ${MYSQL_CONTAINER} -u root -proot -e "INSERT INTO firefly.accounts (id, created_at, updated_at, deleted_at, user_id, user_group_id, account_type_id, name, virtual_balance, iban, active, encrypted) VALUES ('1', '2022-01-01 00:00:00', '2022-01-01 00:00:00', NULL, '1', NULL, '3', 'Paypal', NULL, NULL, '1', '0');"
