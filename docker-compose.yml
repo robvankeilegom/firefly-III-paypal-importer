@@ -5,7 +5,7 @@ services:
 
   firefly:
     container_name: firefly
-    image: fireflyiii/core:latest
+    image: fireflyiii/core:latest@sha256:a2b53539338d1cd04d341b229c3806cb178cf64c72459060e3ed34bec4167bd8
     restart: always
     volumes:
       - firefly_iii_upload:/var/www/html/storage/upload
