@@ -26,7 +26,7 @@ class SyncFirefly extends Command
      */
     public function handle(): int
     {
-        $client = new AppSync();
+        $client = new AppSync;
 
         $this->info('Pushing data to Firefly');
 

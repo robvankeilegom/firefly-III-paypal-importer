@@ -2,14 +2,14 @@
 
 namespace App;
 
-use GuzzleHttp\Client;
 use App\Models\Transaction;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Log;
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\TransferException;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 
 class Firefly
 {
@@ -26,10 +26,10 @@ class Firefly
         $this->tag = date('Ymd-His', time());
 
         $this->client = new Client([
-            'base_uri' => rtrim(config('services.firefly.uri'), '/') . '/api/v1/',
-            'headers'  => [
-                'Accept'        => 'application/json',
-                'Authorization' => 'Bearer ' . config('services.firefly.token'),
+            'base_uri' => rtrim(config('services.firefly.uri'), '/').'/api/v1/',
+            'headers' => [
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer '.config('services.firefly.token'),
             ],
         ]);
 
@@ -51,10 +51,10 @@ class Firefly
         }
 
         // Set type depending on transaction
-        $direction   = '';
-        $type        = '';
+        $direction = '';
+        $type = '';
         $destination = '';
-        $source      = '';
+        $source = '';
 
         if ($transaction->is_payment) {
             $direction = 'expense';
@@ -101,7 +101,7 @@ class Firefly
                     $response = json_decode($e->getResponse()->getBody(), true);
                 }
 
-                if ('This account name is already in use.' === Arr::get($response, 'errors.name.0')) {
+                if (Arr::get($response, 'errors.name.0') === 'This account name is already in use.') {
                     // Find the account by name
                     $fireflyId = $this->findAccountByName($payer->name, $direction);
                 } else {
@@ -148,7 +148,7 @@ class Firefly
                 ->first();
 
             if (is_null($transaction)) {
-                \Log::error('Can\'t find conversion for transaction ' . $conversion->id);
+                \Log::error('Can\'t find conversion for transaction '.$conversion->id);
 
                 return false;
             }
@@ -156,13 +156,13 @@ class Firefly
             // Make sure the currency we're converting from is valid.
             $exists = $this->validateCurrency($conversion->currency);
 
-            if (false === $exists) {
+            if ($exists === false) {
                 \Log::error(
                     'Couldn\'t push transaction: '
-                    . $conversion->id
-                    . '. Currency \''
-                    . $conversion->currency
-                    . '\' doesn\'t exist.'
+                    .$conversion->id
+                    .'. Currency \''
+                    .$conversion->currency
+                    .'\' doesn\'t exist.'
                 );
 
                 return false;
@@ -171,20 +171,20 @@ class Firefly
 
         $data = [
             'error_if_duplicate_hash' => true,
-            'apply_rules'             => true,
-            'fire_webhooks'           => true,
-            'transactions'            => [
+            'apply_rules' => true,
+            'fire_webhooks' => true,
+            'transactions' => [
                 [
-                    'type'           => $type,
-                    'date'           => $transaction->initiation_date->toAtomString(),
-                    'amount'         => abs($transaction->value),
-                    'description'    => substr($transaction->description, 0, 1000) ?: $transaction->pp_id,
-                    'order'          => 0,
-                    'currency_code'  => $this->currency,
-                    'source_id'      => $source,
+                    'type' => $type,
+                    'date' => $transaction->initiation_date->toAtomString(),
+                    'amount' => abs($transaction->value),
+                    'description' => substr($transaction->description, 0, 1000) ?: $transaction->pp_id,
+                    'order' => 0,
+                    'currency_code' => $this->currency,
+                    'source_id' => $source,
                     'destination_id' => $destination,
                     // 'destination_name'   =>,
-                    'notes'       => $transaction->description,
+                    'notes' => $transaction->description,
                     'external_id' => $transaction->pp_id,
                 ],
             ],
@@ -195,21 +195,21 @@ class Firefly
         }
 
         if (! is_null($conversion)) {
-            $data['transactions'][0]['foreign_amount']        = abs($conversion->value);
+            $data['transactions'][0]['foreign_amount'] = abs($conversion->value);
             $data['transactions'][0]['foreign_currency_code'] = $conversion->currency;
         }
 
         if (! is_null($transaction->firefly_id)) {
             // Transaction exists, update it and return the response
             try {
-                $response = $this->client->put('transactions/' . $transaction->firefly_id, [
+                $response = $this->client->put('transactions/'.$transaction->firefly_id, [
                     'json' => $data,
                 ]);
 
                 return true;
             } catch (ClientException $e) {
                 // If there's no response or the response isn't 404, throw the error anyway
-                if (! $e->hasResponse() || 404 !== $e->getResponse()->getStatusCode()) {
+                if (! $e->hasResponse() || $e->getResponse()->getStatusCode() !== 404) {
                     throw $e;
                 }
 
@@ -237,7 +237,7 @@ class Firefly
             }
 
             // Swap out error for a more clear error message
-            if ('The selected transactions.0.foreign_currency_code is invalid.' === $error) {
+            if ($error === 'The selected transactions.0.foreign_currency_code is invalid.') {
                 $error = '';
 
                 if (! is_null($conversion)) {
@@ -306,8 +306,8 @@ class Firefly
     {
         $response = $this->client->post('accounts', [
             'json' => [
-                'name'  => $name,
-                'type'  => $direction,
+                'name' => $name,
+                'type' => $direction,
                 'notes' => $email,
             ],
         ]);
@@ -322,10 +322,10 @@ class Firefly
         }
 
         try {
-            $response = $this->client->get('currencies/' . $currency);
+            $response = $this->client->get('currencies/'.$currency);
         } catch (ClientException $e) {
             // If there's no response or the response isn't 404, throw the error anyway
-            if (! $e->hasResponse() || 404 !== $e->getResponse()->getStatusCode()) {
+            if (! $e->hasResponse() || $e->getResponse()->getStatusCode() !== 404) {
                 throw $e;
             }
 
@@ -341,7 +341,7 @@ class Firefly
         $response = $this->client->get('search/accounts', [
             'query' => [
                 'query' => $name, // The query you wish to search for.
-                'type'  => $type, // Type of the account (revenue or expense)
+                'type' => $type, // Type of the account (revenue or expense)
                 'field' => 'name', // The account field(s) you want to search in.
             ],
         ]);
@@ -351,29 +351,29 @@ class Firefly
         $count = count($response->data);
 
         // There's only one account, return it.
-        if (1 === $count) {
+        if ($count === 1) {
             return $response->data[0]->id;
         }
 
         $exactMatches = 0;
-        $match        = null;
+        $match = null;
 
         // Check if there's a single account with an exact match.
         foreach ($response->data as $account) {
             if ($account->attributes->name === $name) {
-                ++$exactMatches;
+                $exactMatches++;
                 $match = $account;
             }
         }
 
-        if (1 === $exactMatches) {
+        if ($exactMatches === 1) {
             // Yes there is, return it.
             return $match->id;
         }
 
         // Not sure what to do.
         throw new \RuntimeException(
-            'Got ' . $count . ' results from search/accounts. Expected 1 result. q: ' . $name . ' type: ' . $type
+            'Got '.$count.' results from search/accounts. Expected 1 result. q: '.$name.' type: '.$type
         );
     }
 }
