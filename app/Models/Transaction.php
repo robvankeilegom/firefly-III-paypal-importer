@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Transaction extends Model
 {
@@ -29,7 +29,7 @@ class Transaction extends Model
      */
     protected $casts = [
         'initiation_date' => 'datetime',
-        'firefly_id'      => 'int',
+        'firefly_id' => 'int',
     ];
 
     public function payer(): BelongsTo
@@ -39,12 +39,12 @@ class Transaction extends Model
 
     public function getIsPaymentAttribute(): bool
     {
-        return 'T00' === substr($this->event_code, 0, 3) && $this->value < 0;
+        return substr($this->event_code, 0, 3) === 'T00' && $this->value < 0;
     }
 
     public function getIsRevenueAttribute(): bool
     {
-        return 'T00' === substr($this->event_code, 0, 3) && $this->value > 0;
+        return substr($this->event_code, 0, 3) === 'T00' && $this->value > 0;
     }
 
     public function getIsRefundAttribute(): bool

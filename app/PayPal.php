@@ -23,21 +23,21 @@ class PayPal
 
     public function __construct()
     {
-        $this->baseUri      = config('services.paypal.uri');
-        $this->clientId     = config('services.paypal.client_id');
+        $this->baseUri = config('services.paypal.uri');
+        $this->clientId = config('services.paypal.client_id');
         $this->clientSecret = config('services.paypal.client_secret');
 
         $this->getToken();
     }
 
-    public function getTransactions(Carbon $date = null): ?array
+    public function getTransactions(?Carbon $date = null): ?array
     {
         if (is_null($date)) {
             $date = Carbon::now();
         }
 
         $start = $date->copy()->startOfMonth();
-        $end   = $date->copy()->endOfMonth();
+        $end = $date->copy()->endOfMonth();
 
         // PayPal's Transaction Search only covers the previous three years.
         // syncPayPal() walks backwards a month at a time and relies on this
@@ -51,20 +51,20 @@ class PayPal
             // Get all transactions for the current month
             $response = $this->client->get('reporting/transactions', [
                 'query' => [
-                    'page'       => 1,
-                    'page_size'  => 500,
+                    'page' => 1,
+                    'page_size' => 500,
                     'start_date' => $start->toAtomString(),
-                    'end_date'   => $end->toAtomString(),
-                    'fields'     => 'all',
+                    'end_date' => $end->toAtomString(),
+                    'fields' => 'all',
                 ],
             ]);
         } catch (\Exception $e) {
-            $body = null !== $e->getResponse() ? (string) $e->getResponse()->getBody() : '';
-            $err  = json_decode($body);
+            $body = $e->getResponse() !== null ? (string) $e->getResponse()->getBody() : '';
+            $err = json_decode($body);
 
             // Returning null tells the caller to stop walking backwards, so it
             // must only mean "there is no more data".
-            if (! empty($err->message) && 'Data for the given start date is not available.' === $err->message) {
+            if (! empty($err->message) && $err->message === 'Data for the given start date is not available.') {
                 return null;
             }
 
@@ -73,7 +73,7 @@ class PayPal
             // handled, so execution fell through to the return below with
             // $response holding a decoded stdClass and died with
             // "Call to undefined method stdClass::getBody()".
-            if (! empty($err->name) && 'INVALID_REQUEST' === $err->name) {
+            if (! empty($err->name) && $err->name === 'INVALID_REQUEST') {
                 return null;
             }
 
@@ -84,7 +84,7 @@ class PayPal
             throw new \RuntimeException(sprintf(
                 'PayPal returned an unexpected error for %s: %s',
                 $start->format('Y-m'),
-                '' !== $body ? $body : $e->getMessage()
+                $body !== '' ? $body : $e->getMessage()
             ));
         }
 
@@ -115,8 +115,8 @@ class PayPal
 
         $this->client = new Client([
             'base_uri' => $this->baseUri,
-            'headers'  => [
-                'Authorization' => 'Bearer ' . $token,
+            'headers' => [
+                'Authorization' => 'Bearer '.$token,
             ],
         ]);
     }

@@ -5,7 +5,7 @@ use App\Models\Payer;
 use App\Models\Transaction;
 
 beforeEach(function () {
-    $this->firefly = new Firefly();
+    $this->firefly = new Firefly;
 });
 
 it('can push an expense', function () {
@@ -145,20 +145,20 @@ it('can push a refund in a foreign currency', function () {
 
     // Conversion in usd
     Transaction::factory([
-        'currency'        => 'USD',
-        'reference_id'    => $transaction->pp_id,
+        'currency' => 'USD',
+        'reference_id' => $transaction->pp_id,
         'initiation_date' => $transaction->initiation_date,
-        'value'           => $usd * -1, // Make value positive
+        'value' => $usd * -1, // Make value positive
     ])
         ->conversion()
         ->create();
 
     // Conversion in EUR
     Transaction::factory([
-        'currency'        => 'EUR',
-        'reference_id'    => $transaction->pp_id,
+        'currency' => 'EUR',
+        'reference_id' => $transaction->pp_id,
         'initiation_date' => $transaction->initiation_date,
-        'value'           => $eur,
+        'value' => $eur,
     ])
         ->conversion()
         ->create();
@@ -180,20 +180,20 @@ it('can push a refund in a foreign currency', function () {
 
     // Conversion in usd
     Transaction::factory([
-        'currency'        => 'USD',
-        'reference_id'    => $transaction->pp_id,
+        'currency' => 'USD',
+        'reference_id' => $transaction->pp_id,
         'initiation_date' => $refund->initiation_date,
-        'value'           => $usd * -1, // Make value positive
+        'value' => $usd * -1, // Make value positive
     ])
         ->conversion()
         ->create();
 
     // Conversion in EUR
     Transaction::factory([
-        'currency'        => 'EUR',
-        'reference_id'    => $transaction->pp_id,
+        'currency' => 'EUR',
+        'reference_id' => $transaction->pp_id,
         'initiation_date' => $refund->initiation_date,
-        'value'           => $eur,
+        'value' => $eur,
     ])
         ->conversion()
         ->create();
