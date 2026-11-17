@@ -20,7 +20,7 @@ steps:
       - composer global require "friendsofphp/php-cs-fixer" --working-dir=/root/tools/php-cs-fixer
 
   - name: Wait for mysql
-    image: mysql:5.7@sha256:4bc6bc963e6d8443453676cae56536f4b8156d78bae03c0145cbe47c2aad73bb
+    image: mysql:26.10@sha256:3819b2b23835c4a73c8b022fafc33c8095c0f81c929a8b7a84613d2fba6c52f5
     commands:
       - while ! mysqladmin ping -h mysql -u root -proot --silent; do sleep 1; done
     depends_on:
@@ -57,7 +57,7 @@ steps:
       - firefly
 
   - name: Add oauth client
-    image: mysql:5.7@sha256:4bc6bc963e6d8443453676cae56536f4b8156d78bae03c0145cbe47c2aad73bb
+    image: mysql:26.10@sha256:3819b2b23835c4a73c8b022fafc33c8095c0f81c929a8b7a84613d2fba6c52f5
     commands:
 
       - mysql -h mysql -u root -proot -e "INSERT INTO firefly.user_groups (id, created_at, updated_at, deleted_at, title) VALUES (null, '2022-01-01 00:00:00', '2022-01-01 00:00:00', NULL, 'testing@robvankeilegom.be');"
@@ -132,7 +132,7 @@ volumes:
 
 services:
   - name: mysql
-    image: mysql:5.7@sha256:4bc6bc963e6d8443453676cae56536f4b8156d78bae03c0145cbe47c2aad73bb
+    image: mysql:26.10@sha256:3819b2b23835c4a73c8b022fafc33c8095c0f81c929a8b7a84613d2fba6c52f5
     environment:
       MYSQL_DATABASE: firefly
       MYSQL_ROOT_PASSWORD: root
